@@ -1,5 +1,7 @@
 var config = {}
 
-config.mongoUrl = 'mongodb://localhost/geospatial_db'
+config.mogoDbName = 'geo_lit_db'
+
+config.mongoUrl = 'mongodb://localhost/' + config.mogoDbName
 
 module.exports = config

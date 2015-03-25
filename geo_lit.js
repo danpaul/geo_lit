@@ -1,5 +1,11 @@
 var geoLit = {}
 
+/*******************************************************************************
+
+                    SETUP/DATA
+
+*******************************************************************************/
+
 var async = require('async')
 var mongoose = require('mongoose')
 
@@ -16,46 +22,50 @@ var MessageSchema = new Schema({
         index: '2d' // create the geospatial index
     }
 });
-var Message = mongoose.model('Location', MessageSchema)
 
-geoLit.init = function(callbackIn){
-    mongoose.connect('mongodb://localhost/geospatial_db', function(err) {  
+var Message = mongoose.model('Message', MessageSchema)
+
+/*******************************************************************************
+
+                    FUNCTIONS
+
+*******************************************************************************/
+
+// intialize mongo connection
+geoLit.init = function(){
+    mongoose.connect(config.mongoUrl, function(err) {  
+        if( err ){ throw(err) }
+    });
+}
+
+// `messageData` should include: longitude, latitude, name, message, user
+geoLit.add = function(messageData, callbackIn){
+
+    var message = new Message({
+        name: messageData.name,
+        message: messageData.message,
+        _user: messageData._user,
+        loc: [messageData.longitude, messageData.latitude]
+    })
+
+    message.save(function(err){
         if( err ){
             callbackIn(err)
         } else {
             callbackIn()
         }
-    });
+    })
 }
 
-// location message object should include: longitude, latitude, name, message,
-//  user
-geoLit.add = function(messagObject, callbackIn){
-
-    var messagObject = new MessageObject({
-        name: MessageObject.name,
-        message: MessageObject.message,
-        _user: MessageObject.user,
-        loc: [MessageObject.longitude, message.latitude] // [<longitude>, <latitude>]
-    })
-
-    coord.save(function(err){
-        if( err ){
+geoLit.findAllMessages = function(callbackIn){
+    Message.find({}, function(err, docs){
+        if(err){
             console.log(err)
             return
         }
-
-        console.log('saved!')
-        Location.find({}, function(err, docs){
-            if(err){
-                console.log(err)
-                return
-            }
-            console.log(docs)
-        })
-
+        console.log(docs)
+        callbackIn(docs)
     })
-
 }
 
 module.exports = geoLit
