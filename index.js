@@ -1,54 +1,85 @@
 /*******************************************************************************
 
-                    SETUP
+                    SETUP/DATA
 
 *******************************************************************************/
 
+// var geoLit = {}
+
+var DEFAULTS = {
+    mogoDbName: 'geo_lit_db',
+    mongoUrl: 'mongodb://localhost/geo_lit_db'
+}
+
+var _ = require('underscore')
 var express = require('express')
-var bodyParser = require('body-parser');
-var geoLit = require('./geo_lit')
-
 var app = express()
+var async = require('async')
+var mongoose = require('mongoose')
 
-geoLit.init()
+var config = require('./config')
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+var Schema = mongoose.Schema
 
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
+var MessageSchema = new Schema({  
+    name: String,
+    message: String,
+    _user: Schema.Types.ObjectId,
+    loc: {
+        type: [Number], // [<longitude>, <latitude>]
+        index: '2d' // create the geospatial index
+    }
 });
 
-/*******************************************************************************
-
-                    ROUTES
-
-*******************************************************************************/
-
-app.get('/', function(req, res){
-    res.send('test')
-})
-
-// Add route
-app.post('/position', function (req, res) {
-    // res.send('POST request to the homepage')
-    res.json({test: 'foo'})
-})
-
+var Message = mongoose.model('Message', MessageSchema)
 
 /*******************************************************************************
 
-                    INIT SERVER
+                    FUNCTIONS
 
 *******************************************************************************/
 
-var server = app.listen(3000, function () {
+module.exports = function(options){
 
-  var host = server.address().address
-  var port = server.address().port
+    var self = this
 
-  console.log("Example app listening at http://%s:%s", host, port)
+    self.init = function(){
 
-})
+        mongoose.connect(options.mongoUrl, function(err) {  
+            if( err ){ throw(err) }
+        });
+
+    }
+
+    // `messageData` should include: longitude, latitude, name, message, user
+    self.add = function(messageData, callbackIn){
+
+        var message = new Message({
+            name: messageData.name,
+            message: messageData.message,
+            _user: messageData._user,
+            loc: [messageData.longitude, messageData.latitude]
+        })
+
+        message.save(function(err){
+            if( err ){
+                callbackIn(err)
+            } else {
+                callbackIn()
+            }
+        })
+    }
+
+    self.findAll = function(callbackIn){
+        Message.find({}, function(err, docs){
+            if(err){
+                console.log(err)
+                return
+            }
+            console.log(docs)
+            callbackIn(docs)
+        })
+    }
+
+    self.init()
+}
