@@ -17,6 +17,8 @@ var app = express()
 var async = require('async')
 var mongoose = require('mongoose')
 
+var bodyParser = require('body-parser')
+
 var config = require('./config')
 
 var Schema = mongoose.Schema
@@ -32,6 +34,31 @@ var MessageSchema = new Schema({
 });
 
 var Message = mongoose.model('Message', MessageSchema)
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
+/*******************************************************************************
+
+                    ROUTES
+
+*******************************************************************************/
+
+app.get('/', function(req, res){
+    res.send('test')
+})
+
+// Add route
+app.post('/position', function (req, res) {
+    // res.send('POST request to the homepage')
+    res.json({test: 'foo'})
+})
 
 /*******************************************************************************
 
@@ -83,3 +110,19 @@ module.exports = function(options){
 
     self.init()
 }
+
+/*******************************************************************************
+
+                    START SERVERS
+
+*******************************************************************************/
+
+app.get('/', function(req, res){
+    res.send('test')
+})
+
+// Add route
+app.post('/position', function (req, res) {
+    // res.send('POST request to the homepage')
+    res.json({test: 'foo'})
+})
