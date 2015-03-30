@@ -55,8 +55,25 @@ app.get('/positions-all', function(req, res){
     })
 })
 
+// example call: /positions-near?longitude=-73.9475406&latitude=40.6762954&range=5.0
+// TODO: validation
 app.get('/positions-near', function(req, res){
-    
+
+    var responseObject = getReponseObject()
+    point.findNear(req.query.longitude,
+                   req.query.latitude,
+                   req.query.range,
+                   function(err, points){
+
+        if( err ){
+            console.log(err)
+            responseObject.success = false
+        } else {
+            responseObject.data = points
+        }
+        res.json(responseObject)
+
+    })    
 })
 
 app.post('/position', function (req, res) {
