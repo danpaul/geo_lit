@@ -42,7 +42,7 @@ app.get('/', function(req, res){
     res.send('')
 })
 
-app.get('/all-positions', function(req, res){
+app.get('/positions-all', function(req, res){
     var responseObject = getReponseObject()
     point.findAll(function(err, points){
         if( err ){
@@ -55,12 +55,22 @@ app.get('/all-positions', function(req, res){
     })
 })
 
-// Add route
+app.get('/positions-near', function(req, res){
+    
+})
+
 app.post('/position', function (req, res) {
     var responseObject = getReponseObject()
     var pointData = req.body
     //TODO: validation
-
+/**
+    locationData should look like this
+    {
+        title: 'some title',
+        user: 12233,
+        location: [2.17403, 41.40338] // longitude, latitude
+    }
+*/
     point.add(pointData, function(err){
         if( err ){
             console.log(err)
