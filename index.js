@@ -27,7 +27,8 @@ var point = new Point({ mongoUrl: config.mongoUrl })
 var getReponseObject = function(){
     return{
         success: true,
-        errorMessage: ''
+        errorMessage: '',
+        data: null
     }
 }
 
@@ -38,7 +39,20 @@ var getReponseObject = function(){
 *******************************************************************************/
 
 app.get('/', function(req, res){
-    res.send('test')
+    res.send('')
+})
+
+app.get('/all-positions', function(req, res){
+    var responseObject = getReponseObject()
+    point.findAll(function(err, points){
+        if( err ){
+            console.log(err)
+            responseObject.success = false
+        } else {
+            responseObject.data = points
+        }
+        res.json(responseObject)
+    })
 })
 
 // Add route
@@ -69,5 +83,4 @@ var server = app.listen(3000, function () {
   var port = server.address().port
 
   console.log("Example app listening at http://%s:%s", host, port)
-
 })
