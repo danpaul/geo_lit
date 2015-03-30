@@ -9,6 +9,7 @@ var express = require('express')
 var async = require('async')
 var bodyParser = require('body-parser')
 var config = require('./config')
+var Point = require('./lib/point')
 
 var app = express()
 
@@ -20,6 +21,15 @@ app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
+
+var point = new Point({ mongoUrl: config.mongoUrl })
+
+var getReponseObject = function(){
+    return{
+        success: true,
+        errorMessage: ''
+    }
+}
 
 /*******************************************************************************
 
@@ -33,8 +43,18 @@ app.get('/', function(req, res){
 
 // Add route
 app.post('/position', function (req, res) {
-    // res.send('POST request to the homepage')
-    res.json({test: 'foo'})
+    var responseObject = getReponseObject()
+    var pointData = req.body
+    //TODO: validation
+
+    point.add(pointData, function(err){
+        if( err ){
+            console.log(err)
+            responseObject.success = false
+        }
+    })
+
+    res.json(responseObject)
 })
 
 /*******************************************************************************

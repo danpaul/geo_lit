@@ -14,9 +14,9 @@ var config = require('./config')
 var Schema = mongoose.Schema
 
 var MessageSchema = new Schema({  
-    name: String,
-    message: String,
-    _user: Schema.Types.ObjectId,
+    title: String,
+    user: Number,
+    // _user: Schema.Types.ObjectId,
     loc: {
         type: [Number], // [<longitude>, <latitude>]
         index: '2d' // create the geospatial index
@@ -38,11 +38,11 @@ geoLit.init = function(){
     });
 }
 
-// `messageData` should include: longitude, latitude, name, message, user
+// `messageData` should include: longitude, latitude, name, title, user
 geoLit.add = function(messageData, callbackIn){
 
     var message = new Message({
-        name: messageData.name,
+        title: messageData.title,
         message: messageData.message,
         _user: messageData._user,
         loc: [messageData.longitude, messageData.latitude]
