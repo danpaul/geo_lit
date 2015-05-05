@@ -26,7 +26,8 @@ var point = new Point({ mongoUrl: config.mongoUrl })
 
 var getReponseObject = function(){
     return{
-        success: true,
+        // success: true,
+        status: 'success',
         errorMessage: '',
         data: null
     }
@@ -47,7 +48,7 @@ app.get('/positions-all', function(req, res){
     point.findAll(function(err, points){
         if( err ){
             console.log(err)
-            responseObject.success = false
+            responseObject.status = 'error'
         } else {
             responseObject.data = points
         }
@@ -56,6 +57,7 @@ app.get('/positions-all', function(req, res){
 })
 
 // example call: /positions-near?longitude=-73.9475406&latitude=40.6762954&range=5.0
+// range is in KM
 // TODO: validation
 app.get('/positions-near', function(req, res){
 
@@ -67,7 +69,7 @@ app.get('/positions-near', function(req, res){
 
         if( err ){
             console.log(err)
-            responseObject.success = false
+            responseObject.status = 'error'
         } else {
             responseObject.data = points
         }
@@ -91,11 +93,13 @@ app.post('/position', function (req, res) {
     point.add(pointData, function(err){
         if( err ){
             console.log(err)
-            responseObject.success = false
+            responseObject.status = 'error'
         }
+console.log(responseObject);
+        res.json(responseObject)
     })
 
-    res.json(responseObject)
+    
 })
 
 /*******************************************************************************
