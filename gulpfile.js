@@ -1,3 +1,5 @@
+// *** Please use [gulp-live-server] instead! *** 
+
 var gulp = require('gulp');
 var server = require('gulp-express');
 
@@ -8,7 +10,6 @@ var reactify = require('reactify');
 var uglify = require('gulp-uglify');
 var sass = require('gulp-sass');
 var minifyCss = require('gulp-minify-css');
-var nodemon = require('gulp-nodemon');
 
 // build JS app
 gulp.task('main-build', function(){
@@ -50,6 +51,6 @@ gulp.task('server', function () {
 // do initial build, watch js and scss and rebuild on change
 gulp.task('default', function() {
     gulp.start(['server', 'main-build', 'minify', 'style-build']);
-    gulp.watch('./frontend_app/app/**/*.*', ['main-build', 'minify']);
-    gulp.watch('./frontend_app/scss/**/*.*', ['style-build']);
+    // gulp.watch('./frontend_app/app/**/*.*', ['main-build', 'minify']);
+    // gulp.watch('./frontend_app/scss/**/*.*', ['style-build']);
 });

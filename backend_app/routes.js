@@ -4,6 +4,9 @@
 
 *******************************************************************************/
 
+var Point = require('./lib/point');
+var point = new Point({ mongoUrl: 'mongodb://localhost/test_point_db' });
+
 var getReponseObject = function(){
     return{
         status: 'success',
@@ -11,7 +14,6 @@ var getReponseObject = function(){
         data: null
     }
 }
-
 
 /*******************************************************************************
 
