@@ -10,4 +10,4 @@ Thumbs.db
 
 # Packages
 /node_modules
-/lib/point
+/public/node_modules
