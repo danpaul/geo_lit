@@ -16,6 +16,17 @@ if( config.environment === 'development' ){
 
     config.port = 3000;
 
+    config.commentsDB = {
+        client: 'mysql',
+        connection: {
+            host: 'localhost',
+            user: 'root',
+            password: 'root',
+            database: 'sql_comment',
+            port:  8889
+        }
+    };
+
 } else if( config.environment === 'production' ) {
 
 

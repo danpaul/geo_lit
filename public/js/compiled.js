@@ -7,14 +7,13 @@
 
 var MAP_ID = 'map-canvas'
 
-var geoLit = require('./lib/geo_lit')
-
-console.log(MAP_ID)
+var geoLit = require('./lib/geo_lit');
+var config = require('../config');
 
 geoLit.init(MAP_ID, function(err){
-    if( err ){ console.log(err) }
+    if( err ){ console.log(err); }
     else{
-        console.log('map initialzed')
+        console.log('map initialzed');
     }
 })
 
@@ -36,7 +35,8 @@ var Main = React.createClass({displayName: "Main",
         $(document).on('geo-lit-place-click', function(event, args){
             self.setState({
                 activeComponent: 'comments',
-                placeId: args._id
+                placeId: args._id,
+                placeTitle: args.title
             })
         });
     },
@@ -44,7 +44,9 @@ var Main = React.createClass({displayName: "Main",
     getInitialState: function(){
         return {
             activeComponent: 'addPlaceForm',
-            placeId: null
+            placeId: null,
+// TODO: UPDATE THIS!!!
+            userId: 1
         };
     },
 
@@ -55,7 +57,10 @@ var Main = React.createClass({displayName: "Main",
                     activeComponent: this.state.activeComponent}), 
                 React.createElement(Comments, {
                     activeComponent: this.state.activeComponent, 
-                    placeId: this.state.placeId})
+                    endpoint: config.commentEndpoint, 
+                    placeId: this.state.placeId, 
+                    placeTitle: this.state.placeTitle, 
+                    userId: this.state.userId})
             )
         );
     }
@@ -63,38 +68,7 @@ var Main = React.createClass({displayName: "Main",
 
 React.render(React.createElement(Main, null), document.getElementById('content'));
 
-},{"./components/addPlaceForm.jsx":3,"./components/comments.jsx":4,"./lib/geo_lit":6}],2:[function(require,module,exports){
-(function (process){
-var config = {};
-
-var config = {};
-
-config.environment = process.env.NODE_ENV ?
-                        process.env.NODE_ENV : 'development';
-
-if( config.environment === 'development' ){
-
-    config.sessionSecret = 'super secret';
-    config.cookieSecrety = 'super secret';
-
-    config.mongoUrl = 'mongodb://localhost/test_point_db';
-
-    config.geoLitEndpoint = 'http://localhost:3000';
-
-    config.port = 3000;
-
-} else if( config.environment === 'production' ) {
-
-
-
-} else {
-    throw('Unkonwn config flag.')
-}
-
-module.exports = config;
-
-}).call(this,require('_process'))
-},{"_process":9}],3:[function(require,module,exports){
+},{"../config":7,"./components/addPlaceForm.jsx":2,"./components/comments.jsx":3,"./lib/geo_lit":4}],2:[function(require,module,exports){
 var services = require('../lib/services.js');
 var geoLit = require('../lib/geo_lit.js');
 
@@ -148,11 +122,48 @@ module.exports = React.createClass({displayName: "exports",
 
 });
 
-},{"../lib/geo_lit.js":6,"../lib/services.js":7}],4:[function(require,module,exports){
+},{"../lib/geo_lit.js":4,"../lib/services.js":5}],3:[function(require,module,exports){
+var _ = require('underscore');
 var services = require('../lib/services.js');
 var geoLit = require('../lib/geo_lit.js');
 
 module.exports = React.createClass({displayName: "exports",
+
+    addComment: function(parentId, comment){
+
+        var self = this;
+        var url = self.props.endpoint + '/comment/' + self.props.placeId +
+                    '/' + parentId;
+
+        $.ajax({
+            type: "POST",
+            'url': url,
+            data: {
+                'comment': comment,
+                'userId': this.props.userId
+            },
+            success: function(response){
+                if( response.status !== 'success' ){
+                    console.log(response);
+                } else {
+                    self.setState({hasLoaded: false});
+                    self.loadComments();
+                }
+            },
+            error: function(err){
+                console.log(err);
+            },
+            dataType: 'JSON'
+        });
+
+    },
+
+    cleanComments: function(comments){
+        var self = this;
+        _.each(comments, function(comment){
+            comment.addComment = self.addComment;
+        })
+    },
 
     componentWillReceiveProps: function(nextProps){
         if( nextProps.placeId !== this.props.placeId ){
@@ -162,21 +173,53 @@ module.exports = React.createClass({displayName: "exports",
     },
 
     getInitialState: function(){
-        return({ isVisible: false, hasLoaded: false });
+        return({ hasLoaded: false, comments: [] });
     },
 
     loadComments: function(placeId){
-        console.log(placeId)
+        var self = this;
+
+        $.ajax({
+            type: "GET",
+            url: self.props.endpoint + '/comments-formatted/' + placeId,
+            success: function(response){
+                if( response.status !== 'success' ){
+                    console.log(response);
+                } else {
+                    self.cleanComments(response.data);
+                    self.setState(
+                        {'comments': response.data, hasLoaded: true}
+                    );
+                }
+            },
+            error: function(err){
+                console.log(err);
+            },
+            dataType: 'JSON'
+        });
     },
 
     render: function(){
-
+console.log(this.state.comments);
         var addPlaceButtonClasses = 'js-add-place button expand';
 
-        if( this.props.activeComponent !== 'comments' ){
-            return(React.createElement("div", null, "comments active"));
-        } else {
+        if(this.props.activeComponent !== 'comments' || !this.state.hasLoaded){
             return(React.createElement("div", null, "comments inactive"));
+        } else {
+            return(
+                React.createElement("div", null, 
+                    React.createElement("h2", null, this.props.placeTitle), 
+                    React.createElement(Comments, {
+                        comments: [{
+                            parent: 0,
+                            children: [],
+                            comment: '',
+                            addComment: this.addComment
+                        }]}), 
+                    React.createElement("h2", null, "TEST"), 
+                    React.createElement(Comments, {comments: this.state.comments})
+
+                ));
         }
     },
 
@@ -186,22 +229,113 @@ module.exports = React.createClass({displayName: "exports",
 
 });
 
-},{"../lib/geo_lit.js":6,"../lib/services.js":7}],5:[function(require,module,exports){
-var config = require('../../../config.js')
 
-module.exports = {
-    log: function(stuff){
-        if( config.debug){ console.log(stuff); }        
+var Comments = React.createClass({displayName: "Comments",
+    render: function(){
+        var self = this;
+
+        var comments = this.props.comments.map(function(comment, index){
+            var isOpen = false;
+            if( comment.comment === null ){ isOpen = true; }
+            var commentChildren = '';
+            if( comment.children.length !== 0 ){
+                commentChildren = React.createElement(Comments, {comments: commentChildren});
+            }
+            return(
+                React.createElement(Comment, {
+                    parent: comment.parent, 
+                    childrenElement: commentChildren, 
+                    comment: comment.comment, 
+                    addComment: self.props.addComment, 
+                    key: index})
+            )
+        })
+
+// console.log(comments)
+
+        return(
+            React.createElement("div", null, 
+                comments
+            )
+        );
+    },
+    updateComment: function(event){
+        this.setState({comment: event.target.value});
     }
-};
+})
 
-},{"../../../config.js":2}],6:[function(require,module,exports){
+var Comment = React.createClass({displayName: "Comment",
+
+    getInitialState: function(){
+        return({comment: ''});
+    },
+    handleSubmit: function(){
+        event.preventDefault();
+        this.props.addComment(this.props.parent, this.state.comment);
+        console.log(this.state.comment);
+    },
+    render: function(){
+        return(
+            React.createElement("div", null, 
+                this.props.comment, 
+                React.createElement("label", null, "Add Comment"), 
+                React.createElement("textarea", {
+                    placeholder: "Add Comment", 
+                    onChange: self.updateComment, 
+                    value: this.state.comment}), 
+                React.createElement("button", {
+                    href: "javascript:null;", 
+                    className: "button small", 
+                    onClick: this.handleSubmit
+                }, " Submit")
+            )
+        )
+
+    },
+    updateComment: function(event){
+        this.setState({comment: event.target.value});
+    }
+
+})
+
+
+// var AddCommentForm = React.createClass({
+//     getInitialState: function(){
+//         return({comment: ''});
+//     },
+//     handleSubmit: function(){
+//         event.preventDefault();
+//         this.props.addComment(this.props.parent, this.state.comment);
+//         console.log(this.state.comment);
+//     },
+//     render: function(){
+//         return(
+//             <div>
+
+//                 <label>Add Comment</label>
+//                 <textarea
+//                     placeholder="Add Comment"
+//                     onChange={this.updateComment}
+//                     value={this.state.comment} />
+//                 <button
+//                     href="javascript:null;"
+//                     className={"button small"}
+//                     onClick={this.handleSubmit}
+//                 > Submit</button>
+//             </div>
+//         )
+//     },
+//     updateComment: function(event){
+//         this.setState({comment: event.target.value});
+//     }
+// })
+
+},{"../lib/geo_lit.js":4,"../lib/services.js":5,"underscore":8}],4:[function(require,module,exports){
 var geoLit = {};
 
 var _ = require('underscore');
 var user = require('./user');
 var services = require('./services')
-var debug = require('./debug')
 
 /*******************************************************************************
 
@@ -288,8 +422,8 @@ geoLit.addPlacesToMap = function(places){
         geoLit.placeMarkers[place._id] =  new google.maps.Marker({
             position: latLang,
             map: geoLit.map,
-            title: 'Current Position',
-            geoLit: {_id: place._id}
+            title: 'TEST TITLE',
+            geoLit: {_id: place._id, title: 'TEST TITLE'}
         });
 
         // trigger events on clicking placed
@@ -303,8 +437,6 @@ geoLit.addPlacesToMap = function(places){
 }
 
 geoLit.updatePlaces = function(callbackIn){
-
-    // debug.log('updating places');
 
     services.findNear({latitude: geoLit.currentLatitude,
                     longitude: geoLit.currentLongitude,
@@ -413,10 +545,9 @@ geoLit.addPlace = function(title, callback){
 
 module.exports = geoLit
 
-},{"./debug":5,"./services":7,"./user":8,"underscore":10}],7:[function(require,module,exports){
+},{"./services":5,"./user":6,"underscore":8}],5:[function(require,module,exports){
 var services = {}
-var config = require('../../../config.js')
-var debug = require('./debug');
+var config = require('../../config.js')
 
 var SERVER_ERROR = 'A server error occurred.';
 
@@ -433,8 +564,8 @@ services.add = function(positionData, callbackIn){
             }
         },
         error: function(err){
-            console.log(err)
-            callbackIn(SERVER_ERROR)
+            console.log(err);
+            callbackIn(SERVER_ERROR);
         },
         dataType: 'JSON'
     });
@@ -447,14 +578,13 @@ services.findNear = function(positionData, callbackIn){
         url: config.geoLitEndpoint + '/positions-near',
         data: positionData,
         success: function(data){
-            if( typeof(data.status) === 'undefined' ||
-                data.status !== 'success' ){
-                callbackIn(data.errorMessage)
-            } else { callbackIn(null, data.data) }
+            if( data.status !== 'success' ){
+                callbackIn(data.errorMessage);
+            } else { callbackIn(null, data.data); }
         },
         error: function(err){
-            debug.log(err)
-            callbackIn(SERVER_ERROR)
+            console.log(err);
+            callbackIn(SERVER_ERROR);
         },
         dataType: 'JSON'
     });
@@ -462,7 +592,7 @@ services.findNear = function(positionData, callbackIn){
 
 module.exports = services;
 
-},{"../../../config.js":2,"./debug":5}],8:[function(require,module,exports){
+},{"../../config.js":7}],6:[function(require,module,exports){
 var user = {};
 
 user.data = {};
@@ -482,99 +612,28 @@ user.id = 777;
 
 module.exports = user;
 
-},{}],9:[function(require,module,exports){
-// shim for using process in browser
+},{}],7:[function(require,module,exports){
+var config = {};
 
-var process = module.exports = {};
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
+if( window.location.href.toLowerCase().indexOf('localhost') !==  -1 ){
+    config.environment = 'development';
+} else {
+    config.environment = 'production';
 }
 
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = setTimeout(cleanUpNextTick);
-    draining = true;
+if( config.environment === 'development' ){
 
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            currentQueue[queueIndex].run();
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    clearTimeout(timeout);
+    config.geoLitEndpoint = 'http://localhost:3000';    
+
+} else {
+
 }
 
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (!draining) {
-        setTimeout(drainQueue, 0);
-    }
-};
+config.commentEndpoint = config.geoLitEndpoint + '/discussion';
 
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
+module.exports = config;
 
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],10:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors

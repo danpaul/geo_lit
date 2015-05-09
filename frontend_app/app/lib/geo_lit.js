@@ -3,7 +3,6 @@ var geoLit = {};
 var _ = require('underscore');
 var user = require('./user');
 var services = require('./services')
-var debug = require('./debug')
 
 /*******************************************************************************
 
@@ -90,8 +89,8 @@ geoLit.addPlacesToMap = function(places){
         geoLit.placeMarkers[place._id] =  new google.maps.Marker({
             position: latLang,
             map: geoLit.map,
-            title: 'Current Position',
-            geoLit: {_id: place._id}
+            title: 'TEST TITLE',
+            geoLit: {_id: place._id, title: 'TEST TITLE'}
         });
 
         // trigger events on clicking placed
@@ -105,8 +104,6 @@ geoLit.addPlacesToMap = function(places){
 }
 
 geoLit.updatePlaces = function(callbackIn){
-
-    // debug.log('updating places');
 
     services.findNear({latitude: geoLit.currentLatitude,
                     longitude: geoLit.currentLongitude,

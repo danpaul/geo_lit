@@ -6,14 +6,13 @@
 
 var MAP_ID = 'map-canvas'
 
-var geoLit = require('./lib/geo_lit')
-
-console.log(MAP_ID)
+var geoLit = require('./lib/geo_lit');
+var config = require('../config');
 
 geoLit.init(MAP_ID, function(err){
-    if( err ){ console.log(err) }
+    if( err ){ console.log(err); }
     else{
-        console.log('map initialzed')
+        console.log('map initialzed');
     }
 })
 
@@ -35,7 +34,8 @@ var Main = React.createClass({
         $(document).on('geo-lit-place-click', function(event, args){
             self.setState({
                 activeComponent: 'comments',
-                placeId: args._id
+                placeId: args._id,
+                placeTitle: args.title
             })
         });
     },
@@ -43,7 +43,9 @@ var Main = React.createClass({
     getInitialState: function(){
         return {
             activeComponent: 'addPlaceForm',
-            placeId: null
+            placeId: null,
+// TODO: UPDATE THIS!!!
+            userId: 1
         };
     },
 
@@ -54,7 +56,10 @@ var Main = React.createClass({
                     activeComponent={this.state.activeComponent} />
                 <Comments
                     activeComponent={this.state.activeComponent}
-                    placeId={this.state.placeId} />
+                    endpoint={config.commentEndpoint}
+                    placeId={this.state.placeId}
+                    placeTitle={this.state.placeTitle}
+                    userId={this.state.userId} />
             </div>
         );
     }

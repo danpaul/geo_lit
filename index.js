@@ -6,19 +6,14 @@ var config = require('./config')
 
 *******************************************************************************/
 
-console.log('asdf')
-console.log(config.environment)
-
-
 var express = require('express');
 var app = module.exports.app = exports.app = express();
+var bodyParser = require('body-parser')
+var session = require('express-session')
 
 if( config.environment === 'development' ){
     app.use(require('connect-livereload')());
 }
-
-var bodyParser = require('body-parser')
-var session = require('express-session')
 
 app.use(express.static(__dirname + '/public'));
 
@@ -30,6 +25,16 @@ app.use(session({
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+
+/** 
+*   Setup commenting middleware
+*/
+var knex = require('knex')(config.commentsDB);
+var options = { 'knex': knex, useStringPostId: true };
+
+var sqlCommentsMiddleware = require('sql_comments_middleware')(options);
+
+app.use('/discussion', sqlCommentsMiddleware);
 
 /*******************************************************************************
 

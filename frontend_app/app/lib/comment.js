@@ -1,8 +1,8 @@
 var comment = {}
 
-var config = require('../../../config.js')
+var config = require('../../config.js');
 
-var endPoint = config.geoLitEndpoint + '/discussion'
+var endPoint = config.geoLitEndpoint + '/discussion';
 
 // commentObject should include: location, parent, userId, comment
 comment.add = function(commentObject, callbackIn){
