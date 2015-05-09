@@ -86,7 +86,7 @@ geoLit.addPlacesToMap = function(places){
         var latLang = new google.maps.LatLng(place.location[1],
                                              place.location[0]);
 
-        
+        // add marker to map        
         geoLit.placeMarkers[place._id] =  new google.maps.Marker({
             position: latLang,
             map: geoLit.map,
@@ -94,16 +94,13 @@ geoLit.addPlacesToMap = function(places){
             geoLit: {_id: place._id}
         });
 
-  google.maps.event.addListener(geoLit.placeMarkers[place._id],
-                                'click',
-                                function(){
+        // trigger events on clicking placed
+        google.maps.event.addListener(geoLit.placeMarkers[place._id],
+                                    'click',
+                                    function(){
 
-// asdf asdf
-// console.log(this.geoLit)
-
-
-  });
-
+            $(document).trigger('geo-lit-place-click', [this.geoLit]);
+        });
     })
 }
 

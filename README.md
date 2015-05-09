@@ -2,7 +2,7 @@
 
 Frontend development:
 ```
-NODE_ENV=development gulp
+gulp
 ```
 
 Backend development (if you have [nodemon](https://github.com/remy/nodemon) installed):
@@ -18,3 +18,8 @@ Production:
 ```
 NODE_ENV=production node index.js
 ```
+
+## Global Events
+
+geo-lit-place-click [_id: place id]
+    Triggered when user cicks on place.

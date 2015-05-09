@@ -25,15 +25,45 @@ geoLit.init(MAP_ID, function(err){
 *******************************************************************************/
 
 var AddPlaceForm = require('./components/addPlaceForm.jsx');
+var Comments = require('./components/comments.jsx');
 
-React.render(
-    React.createElement("div", null, 
-        React.createElement(AddPlaceForm, null)
-    ),
-    document.getElementById('content')
-);
+var Main = React.createClass({displayName: "Main",
 
-},{"./components/addPlaceForm.jsx":3,"./lib/geo_lit":5}],2:[function(require,module,exports){
+    componentDidMount: function(){
+
+        var self = this;
+
+        $(document).on('geo-lit-place-click', function(event, args){
+            self.setState({
+                activeComponent: 'comments',
+                placeId: args._id
+            })
+        });
+    },
+
+    getInitialState: function(){
+        return {
+            activeComponent: 'addPlaceForm',
+            placeId: null
+        };
+    },
+
+    render: function(){
+        return(
+            React.createElement("div", null, 
+                React.createElement(AddPlaceForm, {
+                    activeComponent: this.state.activeComponent}), 
+                React.createElement(Comments, {
+                    activeComponent: this.state.activeComponent, 
+                    placeId: this.state.placeId})
+            )
+        );
+    }
+});
+
+React.render(React.createElement(Main, null), document.getElementById('content'));
+
+},{"./components/addPlaceForm.jsx":3,"./components/comments.jsx":4,"./lib/geo_lit":6}],2:[function(require,module,exports){
 (function (process){
 var config = {};
 
@@ -64,11 +94,24 @@ if( config.environment === 'development' ){
 module.exports = config;
 
 }).call(this,require('_process'))
-},{"_process":8}],3:[function(require,module,exports){
+},{"_process":9}],3:[function(require,module,exports){
 var services = require('../lib/services.js');
 var geoLit = require('../lib/geo_lit.js');
 
 module.exports = React.createClass({displayName: "exports",
+
+    addPlace: function(event){
+        var self = this;
+        event.preventDefault();
+        geoLit.addPlace(this.state.placeValue, function(errorMessage){
+            if( errorMessage ){
+                self.setState({'errorMessage': errorMessage});
+            } else {
+                console.log(self.state.placeValue + ' added.');
+            }
+        })
+    },
+
     getInitialState: function(){
         return({ placeValue: '', errorMessage: ''});
     },
@@ -101,22 +144,49 @@ module.exports = React.createClass({displayName: "exports",
 
     updatePlaceValue: function(event){
         this.setState({placeValue: event.target.value});
-    },
-
-    addPlace: function(event){
-// console.log(event)
-        var self = this;
-        event.preventDefault();
-        geoLit.addPlace(this.state.placeValue, function(errorMessage){
-            if( errorMessage ){
-                self.setState({'errorMessage': errorMessage});
-            }
-        })
     }
 
 });
 
-},{"../lib/geo_lit.js":5,"../lib/services.js":6}],4:[function(require,module,exports){
+},{"../lib/geo_lit.js":6,"../lib/services.js":7}],4:[function(require,module,exports){
+var services = require('../lib/services.js');
+var geoLit = require('../lib/geo_lit.js');
+
+module.exports = React.createClass({displayName: "exports",
+
+    componentWillReceiveProps: function(nextProps){
+        if( nextProps.placeId !== this.props.placeId ){
+            this.loadComments(nextProps.placeId);
+            this.setState({hasLoaded: false});
+        }
+    },
+
+    getInitialState: function(){
+        return({ isVisible: false, hasLoaded: false });
+    },
+
+    loadComments: function(placeId){
+        console.log(placeId)
+    },
+
+    render: function(){
+
+        var addPlaceButtonClasses = 'js-add-place button expand';
+
+        if( this.props.activeComponent !== 'comments' ){
+            return(React.createElement("div", null, "comments active"));
+        } else {
+            return(React.createElement("div", null, "comments inactive"));
+        }
+    },
+
+    updatePlaceValue: function(event){
+        this.setState({placeValue: event.target.value});
+    }
+
+});
+
+},{"../lib/geo_lit.js":6,"../lib/services.js":7}],5:[function(require,module,exports){
 var config = require('../../../config.js')
 
 module.exports = {
@@ -125,7 +195,7 @@ module.exports = {
     }
 };
 
-},{"../../../config.js":2}],5:[function(require,module,exports){
+},{"../../../config.js":2}],6:[function(require,module,exports){
 var geoLit = {};
 
 var _ = require('underscore');
@@ -214,7 +284,7 @@ geoLit.addPlacesToMap = function(places){
         var latLang = new google.maps.LatLng(place.location[1],
                                              place.location[0]);
 
-        
+        // add marker to map        
         geoLit.placeMarkers[place._id] =  new google.maps.Marker({
             position: latLang,
             map: geoLit.map,
@@ -222,16 +292,13 @@ geoLit.addPlacesToMap = function(places){
             geoLit: {_id: place._id}
         });
 
-  google.maps.event.addListener(geoLit.placeMarkers[place._id],
-                                'click',
-                                function(){
+        // trigger events on clicking placed
+        google.maps.event.addListener(geoLit.placeMarkers[place._id],
+                                    'click',
+                                    function(){
 
-// asdf asdf
-// console.log(this.geoLit)
-
-
-  });
-
+            $(document).trigger('geo-lit-place-click', [this.geoLit]);
+        });
     })
 }
 
@@ -346,7 +413,7 @@ geoLit.addPlace = function(title, callback){
 
 module.exports = geoLit
 
-},{"./debug":4,"./services":6,"./user":7,"underscore":9}],6:[function(require,module,exports){
+},{"./debug":5,"./services":7,"./user":8,"underscore":10}],7:[function(require,module,exports){
 var services = {}
 var config = require('../../../config.js')
 var debug = require('./debug');
@@ -395,7 +462,7 @@ services.findNear = function(positionData, callbackIn){
 
 module.exports = services;
 
-},{"../../../config.js":2,"./debug":4}],7:[function(require,module,exports){
+},{"../../../config.js":2,"./debug":5}],8:[function(require,module,exports){
 var user = {};
 
 user.data = {};
@@ -415,7 +482,7 @@ user.id = 777;
 
 module.exports = user;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -507,7 +574,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors

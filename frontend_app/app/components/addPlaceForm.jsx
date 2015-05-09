@@ -2,6 +2,19 @@ var services = require('../lib/services.js');
 var geoLit = require('../lib/geo_lit.js');
 
 module.exports = React.createClass({
+
+    addPlace: function(event){
+        var self = this;
+        event.preventDefault();
+        geoLit.addPlace(this.state.placeValue, function(errorMessage){
+            if( errorMessage ){
+                self.setState({'errorMessage': errorMessage});
+            } else {
+                console.log(self.state.placeValue + ' added.');
+            }
+        })
+    },
+
     getInitialState: function(){
         return({ placeValue: '', errorMessage: ''});
     },
@@ -34,17 +47,6 @@ module.exports = React.createClass({
 
     updatePlaceValue: function(event){
         this.setState({placeValue: event.target.value});
-    },
-
-    addPlace: function(event){
-// console.log(event)
-        var self = this;
-        event.preventDefault();
-        geoLit.addPlace(this.state.placeValue, function(errorMessage){
-            if( errorMessage ){
-                self.setState({'errorMessage': errorMessage});
-            }
-        })
     }
 
 });
