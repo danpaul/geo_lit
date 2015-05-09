@@ -6,10 +6,14 @@ var config = require('./config')
 
 *******************************************************************************/
 
+console.log('asdf')
+console.log(config.environment)
+
+
 var express = require('express');
 var app = module.exports.app = exports.app = express();
 
-if( config.enviornment === 'development' ){
+if( config.environment === 'development' ){
     app.use(require('connect-livereload')());
 }
 
