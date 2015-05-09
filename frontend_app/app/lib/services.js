@@ -1,5 +1,5 @@
 var services = {}
-var config = require('../../config.js')
+var config = require('../../../config.js')
 var debug = require('./debug');
 
 var SERVER_ERROR = 'A server error occurred.';

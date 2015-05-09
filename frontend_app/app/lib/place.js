@@ -1,5 +1,5 @@
 var place = {}
-var config = require('../../config.js')
+var config = require('../../../config.js')
 
 var SERVER_ERROR = new Error('A server error occurred.')
 

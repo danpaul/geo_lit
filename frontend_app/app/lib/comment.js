@@ -1,6 +1,6 @@
 var comment = {}
 
-var config = require('../../config.js')
+var config = require('../../../config.js')
 
 var endPoint = config.geoLitEndpoint + '/discussion'
 

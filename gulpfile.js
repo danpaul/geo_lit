@@ -51,6 +51,6 @@ gulp.task('server', function () {
 // do initial build, watch js and scss and rebuild on change
 gulp.task('default', function() {
     gulp.start(['server', 'main-build', 'minify', 'style-build']);
-    // gulp.watch('./frontend_app/app/**/*.*', ['main-build', 'minify']);
-    // gulp.watch('./frontend_app/scss/**/*.*', ['style-build']);
+    gulp.watch('./frontend_app/app/**/*.*', ['main-build', 'minify']);
+    gulp.watch('./frontend_app/scss/**/*.*', ['style-build']);
 });

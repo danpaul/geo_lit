@@ -33,7 +33,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 *******************************************************************************/
 
-require('./backend_app/routes');
+require('./backend_app/routes')(app);
 
 var server = app.listen(config.port, function () {
     var host = server.address().address
