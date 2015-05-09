@@ -153,7 +153,6 @@ var Comment = React.createClass({
         return(
             <div>
                 {this.props.comment}
-                <label>Add Comment</label>
                 <textarea
                     placeholder="Add Comment"
                     onChange={self.updateComment}
@@ -165,7 +164,6 @@ var Comment = React.createClass({
                 > Submit</button>
             </div>
         )
-
     },
     updateComment: function(event){
         this.setState({comment: event.target.value});
