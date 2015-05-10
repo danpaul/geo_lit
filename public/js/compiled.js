@@ -205,11 +205,10 @@ module.exports = React.createClass({displayName: "exports",
         var addPlaceButtonClasses = 'js-add-place button expand';
 
         if(this.props.activeComponent !== 'comments' || !this.state.hasLoaded){
-            return(React.createElement("div", null, "comments inactive"));
+            return(React.createElement("div", null, " "));
         } else {
             return(
                 React.createElement("div", null, 
-                    React.createElement("h2", null, this.props.placeTitle), 
                     React.createElement(Comments, {
                         comments: [{
                             parent: 0,
@@ -217,7 +216,7 @@ module.exports = React.createClass({displayName: "exports",
                             comment: '',
                             addComment: this.addComment
                         }]}), 
-                    React.createElement("h2", null, "TEST"), 
+                    React.createElement("h2", null, " "), 
                     React.createElement(Comments, {comments: this.state.comments})
                 ));
         }
@@ -251,11 +250,7 @@ var Comments = React.createClass({displayName: "Comments",
             );
         });
 
-        return(
-            React.createElement("div", null, 
-                comments
-            )
-        );
+        return(React.createElement("div", null, comments));
     },
     updateComment: function(event){
         this.setState({comment: event.target.value});
@@ -278,12 +273,7 @@ var Comment = React.createClass({displayName: "Comment",
 
         return(
             React.createElement("div", {className: "sql-comment-container"}, 
-                React.createElement("p", null, 
-                    this.props.comment
-                ), 
-                React.createElement("p", null, 
-                    this.props.parent
-                ), 
+                React.createElement("div", null, this.props.comment), 
                 React.createElement("textarea", {
                     placeholder: "Add Comment", 
                     onChange: self.updateComment, 

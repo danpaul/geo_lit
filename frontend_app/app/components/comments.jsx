@@ -80,11 +80,10 @@ module.exports = React.createClass({
         var addPlaceButtonClasses = 'js-add-place button expand';
 
         if(this.props.activeComponent !== 'comments' || !this.state.hasLoaded){
-            return(<div>comments inactive</div>);
+            return(<div> </div>);
         } else {
             return(
                 <div>
-                    <h2>{this.props.placeTitle}</h2>
                     <Comments
                         comments={[{
                             parent: 0,
@@ -92,7 +91,7 @@ module.exports = React.createClass({
                             comment: '',
                             addComment: this.addComment
                         }]} />
-                    <h2>TEST</h2>
+                    <h2> </h2>
                     <Comments comments={this.state.comments} />
                 </div>);
         }
@@ -126,11 +125,7 @@ var Comments = React.createClass({
             );
         });
 
-        return(
-            <div>
-                {comments}
-            </div>
-        );
+        return(<div>{comments}</div>);
     },
     updateComment: function(event){
         this.setState({comment: event.target.value});
@@ -153,12 +148,7 @@ var Comment = React.createClass({
 
         return(
             <div className="sql-comment-container">
-                <p>
-                    {this.props.comment}
-                </p>
-                <p>
-                    {this.props.parent}
-                </p>
+                <div>{this.props.comment}</div>
                 <textarea
                     placeholder="Add Comment"
                     onChange={self.updateComment}
