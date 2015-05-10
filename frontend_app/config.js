@@ -15,5 +15,6 @@ if( config.environment === 'development' ){
 }
 
 config.commentEndpoint = config.geoLitEndpoint + '/discussion';
+config.userEndpoint = config.geoLitEndpoint + '/user';
 
 module.exports = config;

@@ -25,6 +25,7 @@ geoLit.init(MAP_ID, function(err){
 
 var AddPlaceForm = require('./components/addPlaceForm.jsx');
 var Comments = require('./components/comments.jsx');
+var UserForm = require('./lib/user/index.jsx');
 
 var Main = React.createClass({displayName: "Main",
 
@@ -36,7 +37,7 @@ var Main = React.createClass({displayName: "Main",
             self.setState({
                 activeComponent: 'comments',
                 placeId: args._id,
-                placeTitle: args.title
+                placeTitle: args.title,
             })
         });
     },
@@ -46,13 +47,34 @@ var Main = React.createClass({displayName: "Main",
             activeComponent: 'addPlaceForm',
             placeId: null,
 // TODO: UPDATE THIS!!!
-            userId: 1
+            userId: 1,
+            user: null,
+            isLoggedIn: false
         };
+    },
+
+    loginCallback: function(user){
+console.log(user);
+        this.setState({
+            user: user,
+            isLoggedIn: true
+        })
+    },
+
+    logoutCallback: function(){
+        this.setState({
+            user: null,
+            isLoggedIn: false
+        })
     },
 
     render: function(){
         return(
             React.createElement("div", null, 
+                React.createElement(UserForm, {
+                    endpoint: config.userEndpoint, 
+                    loginCallback: this.loginCallback, 
+                    logoutCallback: this.logoutCallback}), 
                 React.createElement(AddPlaceForm, {
                     activeComponent: this.state.activeComponent}), 
                 React.createElement(Comments, {
@@ -68,7 +90,7 @@ var Main = React.createClass({displayName: "Main",
 
 React.render(React.createElement(Main, null), document.getElementById('content'));
 
-},{"../config":7,"./components/addPlaceForm.jsx":2,"./components/comments.jsx":3,"./lib/geo_lit":4}],2:[function(require,module,exports){
+},{"../config":12,"./components/addPlaceForm.jsx":2,"./components/comments.jsx":3,"./lib/geo_lit":4,"./lib/user/index.jsx":7}],2:[function(require,module,exports){
 var services = require('../lib/services.js');
 var geoLit = require('../lib/geo_lit.js');
 
@@ -294,7 +316,7 @@ var Comment = React.createClass({displayName: "Comment",
     }
 })
 
-},{"../lib/geo_lit.js":4,"../lib/services.js":5,"underscore":8}],4:[function(require,module,exports){
+},{"../lib/geo_lit.js":4,"../lib/services.js":5,"underscore":13}],4:[function(require,module,exports){
 var geoLit = {};
 
 var _ = require('underscore');
@@ -509,7 +531,7 @@ geoLit.addPlace = function(title, callback){
 
 module.exports = geoLit
 
-},{"./services":5,"./user":6,"underscore":8}],5:[function(require,module,exports){
+},{"./services":5,"./user":6,"underscore":13}],5:[function(require,module,exports){
 var services = {}
 var config = require('../../config.js')
 
@@ -556,7 +578,7 @@ services.findNear = function(positionData, callbackIn){
 
 module.exports = services;
 
-},{"../../config.js":7}],6:[function(require,module,exports){
+},{"../../config.js":12}],6:[function(require,module,exports){
 var user = {};
 
 user.data = {};
@@ -577,6 +599,302 @@ user.id = 777;
 module.exports = user;
 
 },{}],7:[function(require,module,exports){
+var FormInput = require('./lib/input.jsx');
+var LoginForm = require('./lib/login_form.jsx');
+var RegisterForm = require('./lib/register_form.jsx');
+
+
+/**
+* Require the following props:
+*   endpoint[sql_login endpoint],
+*   loginCallback[function called afer login, passed user object]
+*   logoutCallback[function called afer logout]
+*/
+module.exports = React.createClass({displayName: "exports",
+    getInitialState: function(){
+        return({
+            activeForm: 'register',
+            isLoggedIn: false,
+            user: null
+        });
+    },
+    handleMenuClickLogin: function(event){
+        this.setState({activeForm: 'login'})
+    },
+    handleMenuClickRegister: function(event){
+        this.setState({activeForm: 'register'})
+    },
+    loginCallback: function(user){
+        this.setState({isLoggedIn: true, user: user})
+        if( this.props.loginCallback ){
+            this.props.loginCallback(user);
+        }
+    },
+    // logoutCallback: function(){
+
+    // },
+    render: function(){
+        var self = this
+
+        var formVisible = {}
+        var forms = ['login', 'register']
+        forms.forEach(function(formType){
+            formVisible[formType] = (formType === self.state.activeForm);
+        })
+
+        return(
+            React.createElement("div", {className: "sql-login-wrap"}, 
+                React.createElement("div", {className: "sql-login-menu"}, 
+                    React.createElement("div", {
+                        className: "sql-login-menu-login", 
+                        onClick: this.handleMenuClickLogin
+                    }, "Login"), 
+                    React.createElement("div", {
+                        className: "sql-login-menu-register", 
+                        onClick: this.handleMenuClickRegister
+                    }, "Register")
+                ), 
+                React.createElement("div", {style: 
+                    formVisible['login'] ?
+                        {display: 'inherit'} : {display: 'none'}
+                }, React.createElement(LoginForm, {
+                    endpoint: this.props.endpoint, 
+                    loginCallback: this.loginCallback})), 
+                React.createElement("div", {style: 
+                    formVisible['register'] ?
+                        {display: 'inherit'} : {display: 'none'}
+                }, React.createElement(RegisterForm, {
+                    endpoint: this.props.endpoint, 
+                    loginCallback: this.loginCallback}))
+            )
+        )
+    }
+});
+
+},{"./lib/input.jsx":8,"./lib/login_form.jsx":9,"./lib/register_form.jsx":10}],8:[function(require,module,exports){
+module.exports = React.createClass({displayName: "exports",
+
+    getInitialState: function(){
+        return {value: ''}
+    },
+    getInputValue: function(){
+        return this.state.value
+    },
+    handleChange: function(event){
+        this.setState({value: event.target.value})
+    },
+    render: function(){
+        return(
+            React.createElement("div", null, 
+                React.createElement("label", null, this.props.label), 
+                React.createElement("input", {
+                    type: this.props.type, 
+                    name: this.props.name, 
+                    ref: this.props.ref, 
+                    value: this.state.value, 
+                    onChange: this.handleChange
+                })
+            )
+        )
+    }
+})
+
+},{}],9:[function(require,module,exports){
+var FormInput = require('./input.jsx');
+var servicesHandler = require('./services_handler.js')
+
+module.exports = React.createClass({displayName: "exports",
+    getInitialState: function(){
+        return({errorMessage: ''});
+    },
+    handleSubmit: function(event){
+        event.preventDefault()
+        var self = this;
+
+        var email = this.refs.email.getInputValue()
+        var password = this.refs.password.getInputValue()
+
+        servicesHandler.login(this.props.endpoint,
+                              email,
+                              password,
+                              function(err, user){
+            if( err ){
+                self.setState({errorMessage: err});
+                return;
+            }
+
+            self.setState({errorMessage: ''});
+
+            if( self.props.loginCallback ){
+                self.props.loginCallback(user);
+            }
+        })
+    },
+    render: function(){
+        return(
+            React.createElement("div", {className: "sql-login-login"}, 
+                React.createElement("div", {className: "sql-login-error-message"}, 
+                    this.state.errorMessage
+                ), 
+                React.createElement("form", {method: "POST", onSubmit: this.handleSubmit}, 
+                    React.createElement(FormInput, {
+                        name: "email", 
+                        type: "text", 
+                        label: "Email", 
+                        ref: "email"}), 
+                    React.createElement(FormInput, {
+                        name: "password", 
+                        type: "password", 
+                        label: "Password", 
+                        ref: "password"}), 
+                    React.createElement("input", {type: "submit", value: "submit"})
+                )
+            )
+        )
+    }
+})
+
+},{"./input.jsx":8,"./services_handler.js":11}],10:[function(require,module,exports){
+var FormInput = require('./input.jsx');
+var servicesHandler = require('./services_handler.js')
+
+module.exports = React.createClass({displayName: "exports",
+
+    passwordMinLength: 8,
+    errorEmail: 'Email address is not valid.',
+    errorPasswordsDontMatch: 'The passwords do not match.',
+    errorPasswordLength: 'The password must be at least ' +
+                          this.passwordMinLength + ' characters.',
+
+    getInitialState: function(){
+        return({errorMessage: ''});
+    },
+
+    handleSubmit: function(event){
+        event.preventDefault()
+        var self = this;
+
+        var email = this.refs.email.getInputValue()
+        var passwordOne = this.refs.password.getInputValue()
+        var passwordTwo = this.refs.confirmPassword.getInputValue()
+
+        var validationResult = this.validate(email, passwordOne, passwordTwo)
+        if( validationResult !== true ){
+            this.setState({errorMessage: validationResult})
+            return;
+        }
+
+        servicesHandler.register(this.props.endpoint,
+                                 email,
+                                 passwordOne,
+                                 function(err, response){
+            if( err ){
+                self.setState({errorMessage: err});
+                return;
+            }
+
+            self.setState({errorMessage: ''});
+
+            if( self.props.loginCallback ){
+                self.props.loginCallback();
+            }
+        })
+    },
+    render: function(){
+        return(
+            React.createElement("div", {className: "sql-login-register"}, 
+                React.createElement("div", {className: "sql-login-error-message"}, 
+                    this.state.errorMessage
+                ), 
+                React.createElement("form", {method: "POST", onSubmit: this.handleSubmit}, 
+                    React.createElement(FormInput, {
+                        name: "email", 
+                        type: "text", 
+                        label: "Email", 
+                        ref: "email"}), 
+                    React.createElement(FormInput, {
+                        name: "password", 
+                        type: "password", 
+                        label: "Password", 
+                        ref: "password"}), 
+                    React.createElement(FormInput, {
+                        name: "confirmPassword", 
+                        type: "password", 
+                        label: "ConfirmPassword", 
+                        ref: "confirmPassword"}), 
+                    React.createElement("input", {type: "submit", value: "Submit"})
+                )
+            )
+        )
+    },
+    validate: function(email, passwordOne, passwordTwo){
+        if( !validateEmail(email) ){
+            return this.errorEmail;
+        }
+        if( passwordOne !== passwordTwo ){
+            return this.errorPasswordsDontMatch;
+        }
+        if( passwordOne.length < this.passwordMinLength ){
+            return this.errorPasswordLength
+        }
+        return true;
+    }
+})
+
+// http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
+function validateEmail(email) {
+    var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+    return re.test(email);
+}
+
+},{"./input.jsx":8,"./services_handler.js":11}],11:[function(require,module,exports){
+var STATUS_SUCCESS = 'success',
+    STATUS_FAILURE = 'failure',
+    STATUS_ERROR = 'error';
+
+module.exports = {
+    register: function(endpoint, email, password, callback){
+        makeRequest({
+            method: 'POST',
+            url: endpoint + '/register',
+            data: {
+                email: email,
+                password: password
+            }            
+        }, callback)
+    },
+    login: function(endpoint, email, password, callback){
+        makeRequest({
+            method: 'POST',
+            url: endpoint + '/login',
+            data: {
+                'email': email,
+                'password': password
+            }
+        }, callback)
+    }
+}
+
+var makeRequest = function(requestData, callback){
+    requestData.success = function(response){
+        if( response.status === STATUS_SUCCESS ){
+            callback(null, response.data);
+        } else if(response.status === STATUS_FAILURE || 
+                  response.status === STATUS_ERROR ){
+            callback(response.message);
+        } else {
+            callback('An error occurred.');
+        }
+    }
+
+    requestData.error = function(jqXHR, status, errorThrown){
+        callback('Error contacting server. You might want to try again.');
+    }
+
+    $.ajax(requestData);
+}
+
+},{}],12:[function(require,module,exports){
 var config = {};
 
 if( window.location.href.toLowerCase().indexOf('localhost') !==  -1 ){
@@ -594,10 +912,11 @@ if( config.environment === 'development' ){
 }
 
 config.commentEndpoint = config.geoLitEndpoint + '/discussion';
+config.userEndpoint = config.geoLitEndpoint + '/user';
 
 module.exports = config;
 
-},{}],8:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors

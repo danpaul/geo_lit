@@ -24,6 +24,7 @@ geoLit.init(MAP_ID, function(err){
 
 var AddPlaceForm = require('./components/addPlaceForm.jsx');
 var Comments = require('./components/comments.jsx');
+var UserForm = require('./lib/user/index.jsx');
 
 var Main = React.createClass({
 
@@ -35,7 +36,7 @@ var Main = React.createClass({
             self.setState({
                 activeComponent: 'comments',
                 placeId: args._id,
-                placeTitle: args.title
+                placeTitle: args.title,
             })
         });
     },
@@ -45,13 +46,34 @@ var Main = React.createClass({
             activeComponent: 'addPlaceForm',
             placeId: null,
 // TODO: UPDATE THIS!!!
-            userId: 1
+            userId: 1,
+            user: null,
+            isLoggedIn: false
         };
+    },
+
+    loginCallback: function(user){
+console.log(user);
+        this.setState({
+            user: user,
+            isLoggedIn: true
+        })
+    },
+
+    logoutCallback: function(){
+        this.setState({
+            user: null,
+            isLoggedIn: false
+        })
     },
 
     render: function(){
         return(
             <div>
+                <UserForm
+                    endpoint={config.userEndpoint}
+                    loginCallback={this.loginCallback}
+                    logoutCallback={this.logoutCallback} />
                 <AddPlaceForm
                     activeComponent={this.state.activeComponent} />
                 <Comments

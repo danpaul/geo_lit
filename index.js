@@ -17,6 +17,9 @@ if( config.environment === 'development' ){
 
 app.use(express.static(__dirname + '/public'));
 
+/** 
+*   Session handling/body parseing
+*/
 app.use(require('cookie-parser')(config.cookieSecret)); 
 app.use(session({
     secret: config.sessionSecret,
@@ -27,14 +30,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 /** 
-*   Setup commenting middleware
+*   Commenting middleware
 */
 var knex = require('knex')(config.commentsDB);
 var options = { 'knex': knex, useStringPostId: true };
-
 var sqlCommentsMiddleware = require('sql_comments_middleware')(options);
-
 app.use('/discussion', sqlCommentsMiddleware);
+
+/** 
+*   User management middleware
+*/
+var sqlLoginMiddleware = require('sql_login_middleware')({ 'knex': knex });
+app.use('/user', sqlLoginMiddleware);
 
 /*******************************************************************************
 

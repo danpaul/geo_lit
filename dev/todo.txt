@@ -1,1 +1,2 @@
 * Add geo_lit to package.json after finished developing
+* Add sql_login_middleware to package.json after finished developing
