@@ -22,7 +22,7 @@ module.exports = React.createClass({
                     console.log(response);
                 } else {
                     self.setState({hasLoaded: false});
-                    self.loadComments();
+                    self.loadComments(self.props.placeId);
                 }
             },
             error: function(err){
@@ -30,13 +30,15 @@ module.exports = React.createClass({
             },
             dataType: 'JSON'
         });
-
     },
 
     cleanComments: function(comments){
         var self = this;
         _.each(comments, function(comment){
             comment.addComment = self.addComment;
+            if( comment.children.length !== 0 ){
+                self.cleanComments(comment.children);
+            }
         })
     },
 
@@ -73,9 +75,8 @@ module.exports = React.createClass({
             dataType: 'JSON'
         });
     },
-
     render: function(){
-console.log(this.state.comments);
+
         var addPlaceButtonClasses = 'js-add-place button expand';
 
         if(this.props.activeComponent !== 'comments' || !this.state.hasLoaded){
@@ -93,17 +94,13 @@ console.log(this.state.comments);
                         }]} />
                     <h2>TEST</h2>
                     <Comments comments={this.state.comments} />
-
                 </div>);
         }
     },
-
     updatePlaceValue: function(event){
         this.setState({placeValue: event.target.value});
     }
-
 });
-
 
 var Comments = React.createClass({
     render: function(){
@@ -113,20 +110,21 @@ var Comments = React.createClass({
             var isOpen = false;
             if( comment.comment === null ){ isOpen = true; }
             var commentChildren = '';
+
             if( comment.children.length !== 0 ){
-                commentChildren = <Comments comments={commentChildren} />;
+                commentChildren = <Comments comments={comment.children} />;
             }
+
             return(
                 < Comment 
-                    parent={comment.parent}
+                    parent={comment.id}
                     childrenElement={commentChildren}
+                    children={comment.children}
                     comment={comment.comment}
-                    addComment={self.props.addComment}
+                    addComment={comment.addComment}
                     key={index} />
-            )
-        })
-
-// console.log(comments)
+            );
+        });
 
         return(
             <div>
@@ -150,55 +148,33 @@ var Comment = React.createClass({
         console.log(this.state.comment);
     },
     render: function(){
+
+        var self = this;
+
         return(
-            <div>
-                {this.props.comment}
+            <div className="sql-comment-container">
+                <p>
+                    {this.props.comment}
+                </p>
+                <p>
+                    {this.props.parent}
+                </p>
                 <textarea
                     placeholder="Add Comment"
                     onChange={self.updateComment}
-                    value={this.state.comment} />
+                    value={self.state.comment} />
                 <button
                     href="javascript:null;"
                     className={"button small"}
-                    onClick={this.handleSubmit}
+                    onClick={self.handleSubmit}
                 > Submit</button>
+                <div>
+                    {this.props.childrenElement}
+                </div>
             </div>
         )
     },
     updateComment: function(event){
         this.setState({comment: event.target.value});
     }
-
 })
-
-
-// var AddCommentForm = React.createClass({
-//     getInitialState: function(){
-//         return({comment: ''});
-//     },
-//     handleSubmit: function(){
-//         event.preventDefault();
-//         this.props.addComment(this.props.parent, this.state.comment);
-//         console.log(this.state.comment);
-//     },
-//     render: function(){
-//         return(
-//             <div>
-
-//                 <label>Add Comment</label>
-//                 <textarea
-//                     placeholder="Add Comment"
-//                     onChange={this.updateComment}
-//                     value={this.state.comment} />
-//                 <button
-//                     href="javascript:null;"
-//                     className={"button small"}
-//                     onClick={this.handleSubmit}
-//                 > Submit</button>
-//             </div>
-//         )
-//     },
-//     updateComment: function(event){
-//         this.setState({comment: event.target.value});
-//     }
-// })

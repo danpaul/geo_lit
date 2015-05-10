@@ -147,7 +147,7 @@ module.exports = React.createClass({displayName: "exports",
                     console.log(response);
                 } else {
                     self.setState({hasLoaded: false});
-                    self.loadComments();
+                    self.loadComments(self.props.placeId);
                 }
             },
             error: function(err){
@@ -155,13 +155,15 @@ module.exports = React.createClass({displayName: "exports",
             },
             dataType: 'JSON'
         });
-
     },
 
     cleanComments: function(comments){
         var self = this;
         _.each(comments, function(comment){
             comment.addComment = self.addComment;
+            if( comment.children.length !== 0 ){
+                self.cleanComments(comment.children);
+            }
         })
     },
 
@@ -198,9 +200,8 @@ module.exports = React.createClass({displayName: "exports",
             dataType: 'JSON'
         });
     },
-
     render: function(){
-console.log(this.state.comments);
+
         var addPlaceButtonClasses = 'js-add-place button expand';
 
         if(this.props.activeComponent !== 'comments' || !this.state.hasLoaded){
@@ -218,17 +219,13 @@ console.log(this.state.comments);
                         }]}), 
                     React.createElement("h2", null, "TEST"), 
                     React.createElement(Comments, {comments: this.state.comments})
-
                 ));
         }
     },
-
     updatePlaceValue: function(event){
         this.setState({placeValue: event.target.value});
     }
-
 });
-
 
 var Comments = React.createClass({displayName: "Comments",
     render: function(){
@@ -238,20 +235,21 @@ var Comments = React.createClass({displayName: "Comments",
             var isOpen = false;
             if( comment.comment === null ){ isOpen = true; }
             var commentChildren = '';
+
             if( comment.children.length !== 0 ){
-                commentChildren = React.createElement(Comments, {comments: commentChildren});
+                commentChildren = React.createElement(Comments, {comments: comment.children});
             }
+
             return(
                 React.createElement(Comment, {
-                    parent: comment.parent, 
+                    parent: comment.id, 
                     childrenElement: commentChildren, 
+                    children: comment.children, 
                     comment: comment.comment, 
-                    addComment: self.props.addComment, 
+                    addComment: comment.addComment, 
                     key: index})
-            )
-        })
-
-// console.log(comments)
+            );
+        });
 
         return(
             React.createElement("div", null, 
@@ -275,60 +273,36 @@ var Comment = React.createClass({displayName: "Comment",
         console.log(this.state.comment);
     },
     render: function(){
+
+        var self = this;
+
         return(
-            React.createElement("div", null, 
-                this.props.comment, 
-                React.createElement("label", null, "Add Comment"), 
+            React.createElement("div", {className: "sql-comment-container"}, 
+                React.createElement("p", null, 
+                    this.props.comment
+                ), 
+                React.createElement("p", null, 
+                    this.props.parent
+                ), 
                 React.createElement("textarea", {
                     placeholder: "Add Comment", 
                     onChange: self.updateComment, 
-                    value: this.state.comment}), 
+                    value: self.state.comment}), 
                 React.createElement("button", {
                     href: "javascript:null;", 
                     className: "button small", 
-                    onClick: this.handleSubmit
-                }, " Submit")
+                    onClick: self.handleSubmit
+                }, " Submit"), 
+                React.createElement("div", null, 
+                    this.props.childrenElement
+                )
             )
         )
-
     },
     updateComment: function(event){
         this.setState({comment: event.target.value});
     }
-
 })
-
-
-// var AddCommentForm = React.createClass({
-//     getInitialState: function(){
-//         return({comment: ''});
-//     },
-//     handleSubmit: function(){
-//         event.preventDefault();
-//         this.props.addComment(this.props.parent, this.state.comment);
-//         console.log(this.state.comment);
-//     },
-//     render: function(){
-//         return(
-//             <div>
-
-//                 <label>Add Comment</label>
-//                 <textarea
-//                     placeholder="Add Comment"
-//                     onChange={this.updateComment}
-//                     value={this.state.comment} />
-//                 <button
-//                     href="javascript:null;"
-//                     className={"button small"}
-//                     onClick={this.handleSubmit}
-//                 > Submit</button>
-//             </div>
-//         )
-//     },
-//     updateComment: function(event){
-//         this.setState({comment: event.target.value});
-//     }
-// })
 
 },{"../lib/geo_lit.js":4,"../lib/services.js":5,"underscore":8}],4:[function(require,module,exports){
 var geoLit = {};
