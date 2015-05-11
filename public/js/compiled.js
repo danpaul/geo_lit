@@ -54,7 +54,6 @@ var Main = React.createClass({displayName: "Main",
     },
 
     loginCallback: function(user){
-console.log(user);
         this.setState({
             user: user,
             isLoggedIn: true
@@ -603,6 +602,54 @@ var FormInput = require('./lib/input.jsx');
 var LoginForm = require('./lib/login_form.jsx');
 var RegisterForm = require('./lib/register_form.jsx');
 
+var LOGIN_BUTTON_STYLE = {
+    position: 'absolute',
+    top: '5px',
+    left: '5px'
+}
+
+
+var Modal = React.createClass({displayName: "Modal",
+    getInitialState: function(){
+
+return null;
+
+        // return({
+        //     visible: false
+        // });
+    },
+    render: function(){
+        containerStyles = {
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            top: 0,
+            left: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+        }
+
+        modalStyle = {
+            width: '96%',
+            margin: '0 auto',
+            marginTop: '20px',
+            backgroundColor: '#FFF',
+            padding: '20px'
+        }
+
+        if( !this.props.visible ){
+            containerStyles.display = 'none';
+        }
+
+        return(
+            React.createElement("div", {style: containerStyles}, 
+                React.createElement("div", {style: modalStyle}, 
+                    this.props.children
+                )
+            )
+        );
+    }
+});
+
 
 /**
 * Require the following props:
@@ -624,6 +671,9 @@ module.exports = React.createClass({displayName: "exports",
     handleMenuClickRegister: function(event){
         this.setState({activeForm: 'register'})
     },
+    handleLoginButtonClick: function(event){
+        $('#sql-log-user-modal').foundation('reveal', 'open');
+    },
     loginCallback: function(user){
         this.setState({isLoggedIn: true, user: user})
         if( this.props.loginCallback ){
@@ -644,28 +694,51 @@ module.exports = React.createClass({displayName: "exports",
 
         return(
             React.createElement("div", {className: "sql-login-wrap"}, 
-                React.createElement("div", {className: "sql-login-menu"}, 
-                    React.createElement("div", {
-                        className: "sql-login-menu-login", 
-                        onClick: this.handleMenuClickLogin
-                    }, "Login"), 
-                    React.createElement("div", {
-                        className: "sql-login-menu-register", 
-                        onClick: this.handleMenuClickRegister
-                    }, "Register")
+                React.createElement("button", {
+                    className: "sql-login-button button tiny", 
+                    style: LOGIN_BUTTON_STYLE, 
+                    onClick: this.handleLoginButtonClick}, 
+                    "Login"
                 ), 
-                React.createElement("div", {style: 
-                    formVisible['login'] ?
-                        {display: 'inherit'} : {display: 'none'}
-                }, React.createElement(LoginForm, {
-                    endpoint: this.props.endpoint, 
-                    loginCallback: this.loginCallback})), 
-                React.createElement("div", {style: 
-                    formVisible['register'] ?
-                        {display: 'inherit'} : {display: 'none'}
-                }, React.createElement(RegisterForm, {
-                    endpoint: this.props.endpoint, 
-                    loginCallback: this.loginCallback}))
+
+React.createElement(Modal, {
+    visible: true}, 
+
+                    React.createElement("div", {
+                        id: "sql-log-user-modal", 
+                        className: "reveal-modal", 
+                        "data-reveal": true, 
+                        "aria-labelledby": "User", 
+                        "aria-hidden": "true", 
+                        role: "dialog"}, 
+
+                        React.createElement("div", {className: "sql-login-menu"}, 
+                            React.createElement("div", {
+                                className: "sql-login-menu-login", 
+                                onClick: this.handleMenuClickLogin
+                            }, "Login"), 
+                            React.createElement("div", {
+                                className: "sql-login-menu-register", 
+                                onClick: this.handleMenuClickRegister
+                            }, "Register")
+                        ), 
+                        React.createElement("div", {style: 
+                            formVisible['login'] ?
+                                {display: 'inherit'} : {display: 'none'}
+                        }, React.createElement(LoginForm, {
+                            endpoint: this.props.endpoint, 
+                            loginCallback: this.loginCallback})), 
+                        React.createElement("div", {style: 
+                            formVisible['register'] ?
+                                {display: 'inherit'} : {display: 'none'}
+                        }, React.createElement(RegisterForm, {
+                            endpoint: this.props.endpoint, 
+                            loginCallback: this.loginCallback}))
+
+                    )
+
+)
+
             )
         )
     }

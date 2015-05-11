@@ -53,7 +53,6 @@ var Main = React.createClass({
     },
 
     loginCallback: function(user){
-console.log(user);
         this.setState({
             user: user,
             isLoggedIn: true
