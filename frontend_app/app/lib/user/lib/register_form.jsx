@@ -65,7 +65,15 @@ module.exports = React.createClass({
                         type="password"
                         label="ConfirmPassword"
                         ref="confirmPassword"/>
-                    <input type="submit" value="Submit" />
+                    <input
+                        className={"button tiny"}
+                        type="submit"
+                        value="Register" />
+                    <a
+                        style={{ paddingLeft: '12px', fontSize: '10px' }}
+                        onClick={this.props.handleLoginClick} >
+                        Login
+                    </a>
                 </form>
             </div>
         )

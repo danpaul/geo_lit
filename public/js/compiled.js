@@ -609,31 +609,57 @@ var LOGIN_BUTTON_STYLE = {
 }
 
 
+/**
+* should pass properites:
+*   visible: true/false
+*   handleClose: function, should set the Modal's visible property to ralse
+*   optionally can take size: small, medium, large
+*/
 var Modal = React.createClass({displayName: "Modal",
-    getInitialState: function(){
-
-return null;
-
-        // return({
-        //     visible: false
-        // });
-    },
     render: function(){
-        containerStyles = {
+        var containerStyles = {
             position: 'absolute',
             width: '100%',
             height: '100%',
             top: 0,
             left: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            zIndex: 100
         }
 
-        modalStyle = {
-            width: '96%',
+        var modalStyle = {
+            // width: '96%',
             margin: '0 auto',
             marginTop: '20px',
             backgroundColor: '#FFF',
-            padding: '20px'
+            padding: '20px',
+            boxShadow: '0 0 25px #444444'
+        }
+
+        var closeButtonContainerStyle = {
+            marginTop: '-20px',
+            marginLeft: '-10px',
+            width: '100%'
+        }
+
+        var closeButtonStyle = {
+            color: '#000',
+            fontWeight: 100,
+            fontSize: '30px',
+            cursor: 'pointer',
+            top: '20px',
+            left: '20px'
+
+        }
+
+        var modalSize = this.props.size ? this.props.size : 'small';
+        var modalClasses = '';
+        if( modalSize === 'small' ){
+            modalClasses = 'small-12 medium-6 large-4';
+        } else if( modalSize === 'medium' ){
+            modalClasses = 'small-12 medium-10 large-8';
+        } else {
+            modalClasses = 'small-12 medium-10';
         }
 
         if( !this.props.visible ){
@@ -641,8 +667,14 @@ return null;
         }
 
         return(
-            React.createElement("div", {style: containerStyles}, 
-                React.createElement("div", {style: modalStyle}, 
+            React.createElement("div", {style: containerStyles, className: "row"}, 
+                React.createElement("div", {style: modalStyle, className: modalClasses}, 
+                    React.createElement("div", {style: closeButtonContainerStyle}, 
+                        React.createElement("div", {
+                            style: closeButtonStyle, 
+                            onClick: this.props.handleClose
+                        }, "X")
+                    ), 
                     this.props.children
                 )
             )
@@ -660,19 +692,24 @@ return null;
 module.exports = React.createClass({displayName: "exports",
     getInitialState: function(){
         return({
-            activeForm: 'register',
+            activeForm: 'login',
             isLoggedIn: false,
-            user: null
+            user: null,
+            userFormIsVisible: false
         });
+    },
+    handleClose: function(event){
+        this.setState({userFormIsVisible: false});
     },
     handleMenuClickLogin: function(event){
         this.setState({activeForm: 'login'})
+
     },
     handleMenuClickRegister: function(event){
         this.setState({activeForm: 'register'})
     },
     handleLoginButtonClick: function(event){
-        $('#sql-log-user-modal').foundation('reveal', 'open');
+        this.setState({userFormIsVisible: true})
     },
     loginCallback: function(user){
         this.setState({isLoggedIn: true, user: user})
@@ -680,9 +717,6 @@ module.exports = React.createClass({displayName: "exports",
             this.props.loginCallback(user);
         }
     },
-    // logoutCallback: function(){
-
-    // },
     render: function(){
         var self = this
 
@@ -701,44 +735,35 @@ module.exports = React.createClass({displayName: "exports",
                     "Login"
                 ), 
 
-React.createElement(Modal, {
-    visible: true}, 
+                React.createElement(Modal, {
+                    visible: this.state.userFormIsVisible, 
+                    handleClose: this.handleClose}, 
 
                     React.createElement("div", {
                         id: "sql-log-user-modal", 
-                        className: "reveal-modal", 
-                        "data-reveal": true, 
-                        "aria-labelledby": "User", 
-                        "aria-hidden": "true", 
-                        role: "dialog"}, 
-
-                        React.createElement("div", {className: "sql-login-menu"}, 
-                            React.createElement("div", {
-                                className: "sql-login-menu-login", 
-                                onClick: this.handleMenuClickLogin
-                            }, "Login"), 
-                            React.createElement("div", {
-                                className: "sql-login-menu-register", 
-                                onClick: this.handleMenuClickRegister
-                            }, "Register")
-                        ), 
+                        "aria-labelledby": "User"
+                    }, 
                         React.createElement("div", {style: 
                             formVisible['login'] ?
                                 {display: 'inherit'} : {display: 'none'}
-                        }, React.createElement(LoginForm, {
-                            endpoint: this.props.endpoint, 
-                            loginCallback: this.loginCallback})), 
+                        }, 
+                            React.createElement(LoginForm, {
+                                endpoint: this.props.endpoint, 
+                                loginCallback: this.loginCallback, 
+                                handleRegisterClick: this.handleMenuClickRegister}
+                            )
+                        ), 
                         React.createElement("div", {style: 
                             formVisible['register'] ?
                                 {display: 'inherit'} : {display: 'none'}
                         }, React.createElement(RegisterForm, {
                             endpoint: this.props.endpoint, 
-                            loginCallback: this.loginCallback}))
+                            loginCallback: this.loginCallback, 
+                            handleLoginClick: this.handleMenuClickLogin}))
 
                     )
 
-)
-
+                )
             )
         )
     }
@@ -820,7 +845,12 @@ module.exports = React.createClass({displayName: "exports",
                         type: "password", 
                         label: "Password", 
                         ref: "password"}), 
-                    React.createElement("input", {type: "submit", value: "submit"})
+                    React.createElement("input", {className: "button tiny", type: "submit", value: "Login"}), 
+                    React.createElement("a", {
+                        style: { paddingLeft: '12px', fontSize: '10px'}, 
+                        onClick: this.props.handleRegisterClick}, 
+                        "Register"
+                    )
                 )
             )
         )
@@ -895,7 +925,15 @@ module.exports = React.createClass({displayName: "exports",
                         type: "password", 
                         label: "ConfirmPassword", 
                         ref: "confirmPassword"}), 
-                    React.createElement("input", {type: "submit", value: "Submit"})
+                    React.createElement("input", {
+                        className: "button tiny", 
+                        type: "submit", 
+                        value: "Register"}), 
+                    React.createElement("a", {
+                        style: { paddingLeft: '12px', fontSize: '10px'}, 
+                        onClick: this.props.handleLoginClick}, 
+                        "Login"
+                    )
                 )
             )
         )

@@ -9,31 +9,57 @@ var LOGIN_BUTTON_STYLE = {
 }
 
 
+/**
+* should pass properites:
+*   visible: true/false
+*   handleClose: function, should set the Modal's visible property to ralse
+*   optionally can take size: small, medium, large
+*/
 var Modal = React.createClass({
-    getInitialState: function(){
-
-return null;
-
-        // return({
-        //     visible: false
-        // });
-    },
     render: function(){
-        containerStyles = {
+        var containerStyles = {
             position: 'absolute',
             width: '100%',
             height: '100%',
             top: 0,
             left: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            zIndex: 100
         }
 
-        modalStyle = {
-            width: '96%',
+        var modalStyle = {
+            // width: '96%',
             margin: '0 auto',
             marginTop: '20px',
             backgroundColor: '#FFF',
-            padding: '20px'
+            padding: '20px',
+            boxShadow: '0 0 25px #444444'
+        }
+
+        var closeButtonContainerStyle = {
+            marginTop: '-20px',
+            marginLeft: '-10px',
+            width: '100%'
+        }
+
+        var closeButtonStyle = {
+            color: '#000',
+            fontWeight: 100,
+            fontSize: '30px',
+            cursor: 'pointer',
+            top: '20px',
+            left: '20px'
+
+        }
+
+        var modalSize = this.props.size ? this.props.size : 'small';
+        var modalClasses = '';
+        if( modalSize === 'small' ){
+            modalClasses = 'small-12 medium-6 large-4';
+        } else if( modalSize === 'medium' ){
+            modalClasses = 'small-12 medium-10 large-8';
+        } else {
+            modalClasses = 'small-12 medium-10';
         }
 
         if( !this.props.visible ){
@@ -41,8 +67,14 @@ return null;
         }
 
         return(
-            <div style={containerStyles} >
-                <div style={modalStyle}>
+            <div style={containerStyles} className="row" >
+                <div style={modalStyle} className={modalClasses}>
+                    <div style={closeButtonContainerStyle}>
+                        <div
+                            style={closeButtonStyle}
+                            onClick={this.props.handleClose}
+                        >X</div>
+                    </div>
                     {this.props.children}
                 </div>
             </div>
@@ -60,19 +92,24 @@ return null;
 module.exports = React.createClass({
     getInitialState: function(){
         return({
-            activeForm: 'register',
+            activeForm: 'login',
             isLoggedIn: false,
-            user: null
+            user: null,
+            userFormIsVisible: false
         });
+    },
+    handleClose: function(event){
+        this.setState({userFormIsVisible: false});
     },
     handleMenuClickLogin: function(event){
         this.setState({activeForm: 'login'})
+
     },
     handleMenuClickRegister: function(event){
         this.setState({activeForm: 'register'})
     },
     handleLoginButtonClick: function(event){
-        $('#sql-log-user-modal').foundation('reveal', 'open');
+        this.setState({userFormIsVisible: true})
     },
     loginCallback: function(user){
         this.setState({isLoggedIn: true, user: user})
@@ -80,9 +117,6 @@ module.exports = React.createClass({
             this.props.loginCallback(user);
         }
     },
-    // logoutCallback: function(){
-
-    // },
     render: function(){
         var self = this
 
@@ -101,44 +135,35 @@ module.exports = React.createClass({
                     Login
                 </button>
 
-<Modal
-    visible={true} >
+                <Modal
+                    visible={this.state.userFormIsVisible}
+                    handleClose={this.handleClose} >
 
                     <div
                         id="sql-log-user-modal"
-                        className="reveal-modal"
-                        data-reveal
                         aria-labelledby="User"
-                        aria-hidden="true"
-                        role="dialog" >
-
-                        <div className="sql-login-menu">
-                            <div
-                                className="sql-login-menu-login"
-                                onClick={this.handleMenuClickLogin}
-                            >Login</div>
-                            <div
-                                className="sql-login-menu-register"
-                                onClick={this.handleMenuClickRegister}
-                            >Register</div>
-                        </div>
+                    >
                         <div style={
                             formVisible['login'] ?
                                 {display: 'inherit'} : {display: 'none'}
-                        }><LoginForm
-                            endpoint={this.props.endpoint}
-                            loginCallback={this.loginCallback}/></div>
+                        }>
+                            <LoginForm
+                                endpoint={this.props.endpoint}
+                                loginCallback={this.loginCallback}
+                                handleRegisterClick={this.handleMenuClickRegister}
+                            />
+                        </div>
                         <div style={
                             formVisible['register'] ?
                                 {display: 'inherit'} : {display: 'none'}
                         }><RegisterForm
                             endpoint={this.props.endpoint}
-                            loginCallback={this.loginCallback} /></div>
+                            loginCallback={this.loginCallback}
+                            handleLoginClick={this.handleMenuClickLogin} /></div>
 
                     </div>
 
-</Modal>
-
+                </Modal>
             </div>
         )
     }
