@@ -35,6 +35,9 @@ module.exports = React.createClass({
     cleanComments: function(comments){
         var self = this;
         _.each(comments, function(comment){
+
+// asdf
+// console.log(comment)
             comment.addComment = self.addComment;
             if( comment.children.length !== 0 ){
                 self.cleanComments(comment.children);
@@ -113,7 +116,8 @@ var Comments = React.createClass({
             if( comment.children.length !== 0 ){
                 commentChildren = <Comments comments={comment.children} />;
             }
-
+// asdf
+// console.log(comment);
             return(
                 < Comment 
                     parent={comment.id}
@@ -121,6 +125,9 @@ var Comments = React.createClass({
                     children={comment.children}
                     comment={comment.comment}
                     addComment={comment.addComment}
+                    // upVotes={comment.up_vote}
+                    // downVotes={comment.down_vote}
+                    rank={comment.rank}
                     key={index} />
             );
         });
@@ -135,30 +142,62 @@ var Comments = React.createClass({
 var Comment = React.createClass({
 
     getInitialState: function(){
-        return({comment: ''});
+        return({comment: '', showCommentForm: false, showChildren: true});
     },
     handleSubmit: function(){
         event.preventDefault();
         this.props.addComment(this.props.parent, this.state.comment);
-        console.log(this.state.comment);
+    },
+    handleToggleChilren: function(){
+        var nextState = !this.state.showChildren;
+        this.setState({showChildren: nextState});
+    },
+    handleToggleCommentForm: function(){
+        var nextState = !this.state.showCommentForm;
+        this.setState({showCommentForm: nextState});
     },
     render: function(){
 
         var self = this;
 
+        var commentFormStyle = this.state.showCommentForm ?
+                {display: 'block'} : {display: 'none'};
+
+        var toggleCharacter = self.state.showChildren ? '-' : '+';
+        var childContainerStyle = self.state.showChildren ?
+                {display: 'block'} : {display: 'none'};
+
         return(
             <div className="sql-comment-container">
-                <div>{this.props.comment}</div>
-                <textarea
-                    placeholder="Add Comment"
-                    onChange={self.updateComment}
-                    value={self.state.comment} />
-                <button
-                    href="javascript:null;"
-                    className={"button small"}
-                    onClick={self.handleSubmit}
-                > Submit</button>
                 <div>
+                    [<a onClick={this.handleToggleChilren}>{toggleCharacter}</a>]
+                    <span style={{
+                        marginLeft: '3px',
+                        position: 'relative',
+                        top: '1px'
+
+                    }}>
+                        {this.props.rank}
+                    </span>
+                </div>
+                <div>{this.props.comment}</div>
+                <div style={!this.state.showCommentForm ? {display: 'block'} : {display: 'none'}}>
+                    <a onClick={this.handleToggleCommentForm}>
+                        comment
+                    </a>
+                </div>
+                <div style={commentFormStyle}>
+                    <textarea
+                        placeholder="Add Comment"
+                        onChange={self.updateComment}
+                        value={self.state.comment} />
+                    <button
+                        href="javascript:null;"
+                        className={"button small"}
+                        onClick={self.handleSubmit}
+                    > Submit</button>
+                </div>
+                <div style={childContainerStyle}>
                     {this.props.childrenElement}
                 </div>
             </div>

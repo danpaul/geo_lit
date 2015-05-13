@@ -67,6 +67,17 @@ var Main = React.createClass({displayName: "Main",
         })
     },
 
+    componentDidMount: function(){
+
+// asdf TODO: REMOVE THIS!!!
+this.setState({
+    activeComponent: 'comments',
+    placeId: '554d73c2cae7eb0a05f467c8',
+    placeTitle: 'test',
+});
+
+    },
+
     render: function(){
         return(
             React.createElement("div", null, 
@@ -76,12 +87,20 @@ var Main = React.createClass({displayName: "Main",
                     logoutCallback: this.logoutCallback}), 
                 React.createElement(AddPlaceForm, {
                     activeComponent: this.state.activeComponent}), 
+React.createElement("div", {className: "row"}, 
+    React.createElement("div", {className: "small-12 columns"}, 
+
+
                 React.createElement(Comments, {
                     activeComponent: this.state.activeComponent, 
                     endpoint: config.commentEndpoint, 
                     placeId: this.state.placeId, 
                     placeTitle: this.state.placeTitle, 
                     userId: this.state.userId})
+
+
+    )
+)
             )
         );
     }
@@ -89,7 +108,7 @@ var Main = React.createClass({displayName: "Main",
 
 React.render(React.createElement(Main, null), document.getElementById('content'));
 
-},{"../config":12,"./components/addPlaceForm.jsx":2,"./components/comments.jsx":3,"./lib/geo_lit":4,"./lib/user/index.jsx":7}],2:[function(require,module,exports){
+},{"../config":13,"./components/addPlaceForm.jsx":2,"./components/comments.jsx":3,"./lib/geo_lit":4,"./lib/user/index.jsx":7}],2:[function(require,module,exports){
 var services = require('../lib/services.js');
 var geoLit = require('../lib/geo_lit.js');
 
@@ -181,6 +200,9 @@ module.exports = React.createClass({displayName: "exports",
     cleanComments: function(comments){
         var self = this;
         _.each(comments, function(comment){
+
+// asdf
+// console.log(comment)
             comment.addComment = self.addComment;
             if( comment.children.length !== 0 ){
                 self.cleanComments(comment.children);
@@ -259,7 +281,8 @@ var Comments = React.createClass({displayName: "Comments",
             if( comment.children.length !== 0 ){
                 commentChildren = React.createElement(Comments, {comments: comment.children});
             }
-
+// asdf
+// console.log(comment);
             return(
                 React.createElement(Comment, {
                     parent: comment.id, 
@@ -267,6 +290,9 @@ var Comments = React.createClass({displayName: "Comments",
                     children: comment.children, 
                     comment: comment.comment, 
                     addComment: comment.addComment, 
+                    // upVotes={comment.up_vote}
+                    // downVotes={comment.down_vote}
+                    rank: comment.rank, 
                     key: index})
             );
         });
@@ -281,30 +307,62 @@ var Comments = React.createClass({displayName: "Comments",
 var Comment = React.createClass({displayName: "Comment",
 
     getInitialState: function(){
-        return({comment: ''});
+        return({comment: '', showCommentForm: false, showChildren: true});
     },
     handleSubmit: function(){
         event.preventDefault();
         this.props.addComment(this.props.parent, this.state.comment);
-        console.log(this.state.comment);
+    },
+    handleToggleChilren: function(){
+        var nextState = !this.state.showChildren;
+        this.setState({showChildren: nextState});
+    },
+    handleToggleCommentForm: function(){
+        var nextState = !this.state.showCommentForm;
+        this.setState({showCommentForm: nextState});
     },
     render: function(){
 
         var self = this;
 
+        var commentFormStyle = this.state.showCommentForm ?
+                {display: 'block'} : {display: 'none'};
+
+        var toggleCharacter = self.state.showChildren ? '-' : '+';
+        var childContainerStyle = self.state.showChildren ?
+                {display: 'block'} : {display: 'none'};
+
         return(
             React.createElement("div", {className: "sql-comment-container"}, 
-                React.createElement("div", null, this.props.comment), 
-                React.createElement("textarea", {
-                    placeholder: "Add Comment", 
-                    onChange: self.updateComment, 
-                    value: self.state.comment}), 
-                React.createElement("button", {
-                    href: "javascript:null;", 
-                    className: "button small", 
-                    onClick: self.handleSubmit
-                }, " Submit"), 
                 React.createElement("div", null, 
+                    "[", React.createElement("a", {onClick: this.handleToggleChilren}, toggleCharacter), "]", 
+                    React.createElement("span", {style: {
+                        marginLeft: '3px',
+                        position: 'relative',
+                        top: '1px'
+
+                    }}, 
+                        this.props.rank
+                    )
+                ), 
+                React.createElement("div", null, this.props.comment), 
+                React.createElement("div", {style: !this.state.showCommentForm ? {display: 'block'} : {display: 'none'}}, 
+                    React.createElement("a", {onClick: this.handleToggleCommentForm}, 
+                        "comment"
+                    )
+                ), 
+                React.createElement("div", {style: commentFormStyle}, 
+                    React.createElement("textarea", {
+                        placeholder: "Add Comment", 
+                        onChange: self.updateComment, 
+                        value: self.state.comment}), 
+                    React.createElement("button", {
+                        href: "javascript:null;", 
+                        className: "button small", 
+                        onClick: self.handleSubmit
+                    }, " Submit")
+                ), 
+                React.createElement("div", {style: childContainerStyle}, 
                     this.props.childrenElement
                 )
             )
@@ -315,7 +373,7 @@ var Comment = React.createClass({displayName: "Comment",
     }
 })
 
-},{"../lib/geo_lit.js":4,"../lib/services.js":5,"underscore":13}],4:[function(require,module,exports){
+},{"../lib/geo_lit.js":4,"../lib/services.js":5,"underscore":14}],4:[function(require,module,exports){
 var geoLit = {};
 
 var _ = require('underscore');
@@ -530,7 +588,7 @@ geoLit.addPlace = function(title, callback){
 
 module.exports = geoLit
 
-},{"./services":5,"./user":6,"underscore":13}],5:[function(require,module,exports){
+},{"./services":5,"./user":6,"underscore":14}],5:[function(require,module,exports){
 var services = {}
 var config = require('../../config.js')
 
@@ -577,7 +635,7 @@ services.findNear = function(positionData, callbackIn){
 
 module.exports = services;
 
-},{"../../config.js":12}],6:[function(require,module,exports){
+},{"../../config.js":13}],6:[function(require,module,exports){
 var user = {};
 
 user.data = {};
@@ -601,87 +659,13 @@ module.exports = user;
 var FormInput = require('./lib/input.jsx');
 var LoginForm = require('./lib/login_form.jsx');
 var RegisterForm = require('./lib/register_form.jsx');
+var Modal = require('./lib/modal.jsx');
 
 var LOGIN_BUTTON_STYLE = {
     position: 'absolute',
     top: '5px',
     left: '5px'
 }
-
-
-/**
-* should pass properites:
-*   visible: true/false
-*   handleClose: function, should set the Modal's visible property to ralse
-*   optionally can take size: small, medium, large
-*/
-var Modal = React.createClass({displayName: "Modal",
-    render: function(){
-        var containerStyles = {
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            top: 0,
-            left: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.3)',
-            zIndex: 100
-        }
-
-        var modalStyle = {
-            // width: '96%',
-            margin: '0 auto',
-            marginTop: '20px',
-            backgroundColor: '#FFF',
-            padding: '20px',
-            boxShadow: '0 0 25px #444444'
-        }
-
-        var closeButtonContainerStyle = {
-            marginTop: '-20px',
-            marginLeft: '-10px',
-            width: '100%'
-        }
-
-        var closeButtonStyle = {
-            color: '#000',
-            fontWeight: 100,
-            fontSize: '30px',
-            cursor: 'pointer',
-            top: '20px',
-            left: '20px'
-
-        }
-
-        var modalSize = this.props.size ? this.props.size : 'small';
-        var modalClasses = '';
-        if( modalSize === 'small' ){
-            modalClasses = 'small-12 medium-6 large-4';
-        } else if( modalSize === 'medium' ){
-            modalClasses = 'small-12 medium-10 large-8';
-        } else {
-            modalClasses = 'small-12 medium-10';
-        }
-
-        if( !this.props.visible ){
-            containerStyles.display = 'none';
-        }
-
-        return(
-            React.createElement("div", {style: containerStyles, className: "row"}, 
-                React.createElement("div", {style: modalStyle, className: modalClasses}, 
-                    React.createElement("div", {style: closeButtonContainerStyle}, 
-                        React.createElement("div", {
-                            style: closeButtonStyle, 
-                            onClick: this.props.handleClose
-                        }, "X")
-                    ), 
-                    this.props.children
-                )
-            )
-        );
-    }
-});
-
 
 /**
 * Require the following props:
@@ -769,7 +753,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 });
 
-},{"./lib/input.jsx":8,"./lib/login_form.jsx":9,"./lib/register_form.jsx":10}],8:[function(require,module,exports){
+},{"./lib/input.jsx":8,"./lib/login_form.jsx":9,"./lib/modal.jsx":10,"./lib/register_form.jsx":11}],8:[function(require,module,exports){
 module.exports = React.createClass({displayName: "exports",
 
     getInitialState: function(){
@@ -817,6 +801,7 @@ module.exports = React.createClass({displayName: "exports",
                               password,
                               function(err, user){
             if( err ){
+                console.log(err);
                 self.setState({errorMessage: err});
                 return;
             }
@@ -857,7 +842,83 @@ module.exports = React.createClass({displayName: "exports",
     }
 })
 
-},{"./input.jsx":8,"./services_handler.js":11}],10:[function(require,module,exports){
+},{"./input.jsx":8,"./services_handler.js":12}],10:[function(require,module,exports){
+/**
+* should pass properites:
+*   visible: true/false
+*   handleClose: function, should set the Modal's visible property to ralse
+*   optionally can take size: small, medium, large
+*/
+module.exports = React.createClass({displayName: "exports",
+    render: function(){
+        var containerStyles = {
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            top: 0,
+            left: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            zIndex: 100
+        }
+
+        var modalStyle = {
+            // width: '96%',
+            margin: '0 auto',
+            marginTop: '20px',
+            backgroundColor: '#FFF',
+            padding: '20px',
+            boxShadow: '0 0 25px #444444'
+        }
+
+        var closeButtonContainerStyle = {
+            marginTop: '-20px',
+            marginLeft: '-10px',
+            width: '100%'
+        }
+
+        var closeButtonStyle = {
+            color: '#000',
+            fontWeight: 100,
+            fontSize: '30px',
+            cursor: 'pointer',
+            top: '20px',
+            left: '20px'
+
+        }
+
+        var modalSize = this.props.size ? this.props.size : 'small';
+        var modalClasses = '';
+        if( modalSize === 'small' ){
+            modalClasses = 'small-12 medium-6 large-4';
+        } else if( modalSize === 'medium' ){
+            modalClasses = 'small-12 medium-10 large-8';
+        } else {
+            modalClasses = 'small-12 medium-10';
+        }
+
+        if( !this.props.visible ){
+            containerStyles.display = 'none';
+        }
+
+        return(
+            React.createElement("div", {style: containerStyles}, 
+                React.createElement("div", {className: "row"}, 
+                    React.createElement("div", {style: modalStyle, className: modalClasses}, 
+                        React.createElement("div", {style: closeButtonContainerStyle}, 
+                            React.createElement("div", {
+                                style: closeButtonStyle, 
+                                onClick: this.props.handleClose
+                            }, "X")
+                        ), 
+                        this.props.children
+                    )
+                )
+            )
+        );
+    }
+});
+
+},{}],11:[function(require,module,exports){
 var FormInput = require('./input.jsx');
 var servicesHandler = require('./services_handler.js')
 
@@ -958,7 +1019,7 @@ function validateEmail(email) {
     return re.test(email);
 }
 
-},{"./input.jsx":8,"./services_handler.js":11}],11:[function(require,module,exports){
+},{"./input.jsx":8,"./services_handler.js":12}],12:[function(require,module,exports){
 var STATUS_SUCCESS = 'success',
     STATUS_FAILURE = 'failure',
     STATUS_ERROR = 'error';
@@ -1005,7 +1066,7 @@ var makeRequest = function(requestData, callback){
     $.ajax(requestData);
 }
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var config = {};
 
 if( window.location.href.toLowerCase().indexOf('localhost') !==  -1 ){
@@ -1027,7 +1088,7 @@ config.userEndpoint = config.geoLitEndpoint + '/user';
 
 module.exports = config;
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors

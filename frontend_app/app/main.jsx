@@ -66,6 +66,17 @@ var Main = React.createClass({
         })
     },
 
+    componentDidMount: function(){
+
+// asdf TODO: REMOVE THIS!!!
+this.setState({
+    activeComponent: 'comments',
+    placeId: '554d73c2cae7eb0a05f467c8',
+    placeTitle: 'test',
+});
+
+    },
+
     render: function(){
         return(
             <div>
@@ -75,12 +86,20 @@ var Main = React.createClass({
                     logoutCallback={this.logoutCallback} />
                 <AddPlaceForm
                     activeComponent={this.state.activeComponent} />
+<div className="row">
+    <div className="small-12 columns">
+
+
                 <Comments
                     activeComponent={this.state.activeComponent}
                     endpoint={config.commentEndpoint}
                     placeId={this.state.placeId}
                     placeTitle={this.state.placeTitle}
                     userId={this.state.userId} />
+
+
+    </div>
+</div>
             </div>
         );
     }

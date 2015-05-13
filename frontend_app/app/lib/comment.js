@@ -11,7 +11,6 @@ comment.add = function(commentObject, callbackIn){
               commentObject.location + '/' +
               commentObject.parent
 
-// app.post('/post/:postId/:parentId', function(req, res, next){
     var postData = {
         userId: commentObject.userId,
         comment: commentObject.comment
@@ -28,7 +27,6 @@ comment.add = function(commentObject, callbackIn){
         },
         dataType: 'JSON'
     });
-
 }
 
 

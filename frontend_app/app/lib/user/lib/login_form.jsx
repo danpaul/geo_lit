@@ -17,6 +17,7 @@ module.exports = React.createClass({
                               password,
                               function(err, user){
             if( err ){
+                console.log(err);
                 self.setState({errorMessage: err});
                 return;
             }

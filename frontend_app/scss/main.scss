@@ -6,7 +6,44 @@
     margin-bottom: 20px;
 }
 
-.sql-comment-container > div{
-    width: 95%;
-    float: right;
+// .sql-comment-container > div{
+//     width: 95%;
+//     float: right;
+// }
+
+.sql-comment-container .sql-comment-container{
+    // width: 95%;
+    margin-left: 5%;
+    // float: right;
+    // clear: both;
+}
+
+.button, button {
+    background-color: rgba(0, 0, 0, 0.31);
+    border-radius: 2px;
+    border-color: rgba(255, 255, 255, 0.31);
+    border-width: 1px;
+}
+
+.button:focus, .button:hover, button:focus, button:hover {
+    background-color: rgba(255, 255, 255, 0.31);
+    border-color: rgba(0, 0, 0, 0.31);
+    border-width: 1px;
+    // background-color: #fff;
+    color: #000;
+}
+
+a{
+    color: red;
+}
+
+a:hover{
+    color: #000;
+}
+
+input[type="text"], input[type="password"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="week"], input[type="email"], input[type="tel"], input[type="time"], input[type="url"], input[type="color"], input[type="number"], input[type="search"], textarea {
+
+    box-shadow: none;
+    border-color: rgba(0, 0, 0, 0.31);
+
 }
