@@ -45,7 +45,13 @@ var Main = React.createClass({
         return {
             activeComponent: 'addPlaceForm',
             placeId: null,
+
+
+
 // TODO: UPDATE THIS!!!
+
+
+
             userId: 1,
             user: null,
             isLoggedIn: false

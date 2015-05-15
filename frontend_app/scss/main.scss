@@ -6,32 +6,40 @@
     margin-bottom: 20px;
 }
 
-// .sql-comment-container > div{
-//     width: 95%;
-//     float: right;
-// }
-
 .sql-comment-container .sql-comment-container{
-    // width: 95%;
     margin-left: 5%;
-    // float: right;
-    // clear: both;
 }
 
-.button, button {
+.button, button, button.inverted:hover, button.inverted:focus {
     background-color: rgba(0, 0, 0, 0.31);
     border-radius: 2px;
     border-color: rgba(255, 255, 255, 0.31);
     border-width: 1px;
 }
 
-.button:focus, .button:hover, button:focus, button:hover {
+button.inverted:hover, button.inverted:focus{
+    color: #FFF;
+}
+
+.button:focus, .button:hover, button:focus, button:hover, button.inverted {
     background-color: rgba(255, 255, 255, 0.31);
     border-color: rgba(0, 0, 0, 0.31);
     border-width: 1px;
-    // background-color: #fff;
     color: #000;
 }
+
+.left-padded{
+    margin-left: 5px;
+}
+
+// button.inv {
+//     background-color: rgba(0, 0, 0, 0.31);
+//     border-radius: 2px;
+//     border-color: rgba(255, 255, 255, 0.31);
+//     border-width: 1px;
+// }
+
+
 
 a{
     color: red;
@@ -46,4 +54,13 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
     box-shadow: none;
     border-color: rgba(0, 0, 0, 0.31);
 
+}
+
+.sql-comment-comment-meta{
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.sql-comment-container:nth-child(odd){
+    background-color: red;
 }

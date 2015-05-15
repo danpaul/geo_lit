@@ -46,7 +46,13 @@ var Main = React.createClass({displayName: "Main",
         return {
             activeComponent: 'addPlaceForm',
             placeId: null,
+
+
+
 // TODO: UPDATE THIS!!!
+
+
+
             userId: 1,
             user: null,
             isLoggedIn: false
@@ -200,9 +206,6 @@ module.exports = React.createClass({displayName: "exports",
     cleanComments: function(comments){
         var self = this;
         _.each(comments, function(comment){
-
-// asdf
-// console.log(comment)
             comment.addComment = self.addComment;
             if( comment.children.length !== 0 ){
                 self.cleanComments(comment.children);
@@ -281,8 +284,7 @@ var Comments = React.createClass({displayName: "Comments",
             if( comment.children.length !== 0 ){
                 commentChildren = React.createElement(Comments, {comments: comment.children});
             }
-// asdf
-// console.log(comment);
+
             return(
                 React.createElement(Comment, {
                     parent: comment.id, 
@@ -292,6 +294,7 @@ var Comments = React.createClass({displayName: "Comments",
                     addComment: comment.addComment, 
                     // upVotes={comment.up_vote}
                     // downVotes={comment.down_vote}
+                    created: comment.created, 
                     rank: comment.rank, 
                     key: index})
             );
@@ -308,6 +311,9 @@ var Comment = React.createClass({displayName: "Comment",
 
     getInitialState: function(){
         return({comment: '', showCommentForm: false, showChildren: true});
+    },
+    handleCancel: function(){
+        this.setState({showCommentForm: false});
     },
     handleSubmit: function(){
         event.preventDefault();
@@ -331,18 +337,34 @@ var Comment = React.createClass({displayName: "Comment",
         var toggleCharacter = self.state.showChildren ? '-' : '+';
         var childContainerStyle = self.state.showChildren ?
                 {display: 'block'} : {display: 'none'};
+        var toggleButtonStle = (self.props.children.length === 0) ?
+                                    {display: 'none'} : {display: 'block'};
+        var commentRank = self.props.rank ? self.props.rank : 0;
+
+        var createdDate = new Date(self.props.created * 1000).toString();
+console.log(createdDate)
 
         return(
             React.createElement("div", {className: "sql-comment-container"}, 
-                React.createElement("div", null, 
-                    "[", React.createElement("a", {onClick: this.handleToggleChilren}, toggleCharacter), "]", 
+                React.createElement("div", {className: "sql-comment-comment-meta"}, 
+                    React.createElement("span", {style: toggleButtonStle}, 
+                        "[", React.createElement("a", {onClick: this.handleToggleChilren}, 
+                            toggleCharacter
+                        ), "]"
+                    ), 
+                    React.createElement("span", {className: "sql-comment-username"}, 
+                        "danpaul"
+                    ), " -",  
+                    React.createElement("span", {className: "sql-comment-date"}, 
+                        " ", createdDate
+                    ), " -",  
                     React.createElement("span", {style: {
                         marginLeft: '3px',
                         position: 'relative',
                         top: '1px'
 
                     }}, 
-                        this.props.rank
+                        commentRank
                     )
                 ), 
                 React.createElement("div", null, this.props.comment), 
@@ -360,7 +382,12 @@ var Comment = React.createClass({displayName: "Comment",
                         href: "javascript:null;", 
                         className: "button small", 
                         onClick: self.handleSubmit
-                    }, " Submit")
+                    }, "Submit"), 
+                    React.createElement("button", {
+                        href: "javascript:null;", 
+                        className: "button small inverted left-padded", 
+                        onClick: self.handleCancel
+                    }, "Cancel")
                 ), 
                 React.createElement("div", {style: childContainerStyle}, 
                     this.props.childrenElement

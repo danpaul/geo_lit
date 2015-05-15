@@ -35,9 +35,6 @@ module.exports = React.createClass({
     cleanComments: function(comments){
         var self = this;
         _.each(comments, function(comment){
-
-// asdf
-// console.log(comment)
             comment.addComment = self.addComment;
             if( comment.children.length !== 0 ){
                 self.cleanComments(comment.children);
@@ -116,8 +113,7 @@ var Comments = React.createClass({
             if( comment.children.length !== 0 ){
                 commentChildren = <Comments comments={comment.children} />;
             }
-// asdf
-// console.log(comment);
+
             return(
                 < Comment 
                     parent={comment.id}
@@ -127,6 +123,7 @@ var Comments = React.createClass({
                     addComment={comment.addComment}
                     // upVotes={comment.up_vote}
                     // downVotes={comment.down_vote}
+                    created={comment.created}
                     rank={comment.rank}
                     key={index} />
             );
@@ -143,6 +140,9 @@ var Comment = React.createClass({
 
     getInitialState: function(){
         return({comment: '', showCommentForm: false, showChildren: true});
+    },
+    handleCancel: function(){
+        this.setState({showCommentForm: false});
     },
     handleSubmit: function(){
         event.preventDefault();
@@ -166,18 +166,33 @@ var Comment = React.createClass({
         var toggleCharacter = self.state.showChildren ? '-' : '+';
         var childContainerStyle = self.state.showChildren ?
                 {display: 'block'} : {display: 'none'};
+        var toggleButtonStle = (self.props.children.length === 0) ?
+                                    {display: 'none'} : {display: 'block'};
+        var commentRank = self.props.rank ? self.props.rank : 0;
+
+        var createdDate = new Date(self.props.created * 1000).toString();
 
         return(
             <div className="sql-comment-container">
-                <div>
-                    [<a onClick={this.handleToggleChilren}>{toggleCharacter}</a>]
+                <div className="sql-comment-comment-meta">
+                    <span style={toggleButtonStle}>
+                        [<a onClick={this.handleToggleChilren}>
+                            {toggleCharacter}
+                        </a>]
+                    </span>
+                    <span className="sql-comment-username">
+                        danpaul
+                    </span> - 
+                    <span className="sql-comment-date">
+                        &nbsp;{createdDate}
+                    </span> - 
                     <span style={{
                         marginLeft: '3px',
                         position: 'relative',
                         top: '1px'
 
                     }}>
-                        {this.props.rank}
+                        {commentRank}
                     </span>
                 </div>
                 <div>{this.props.comment}</div>
@@ -195,7 +210,12 @@ var Comment = React.createClass({
                         href="javascript:null;"
                         className={"button small"}
                         onClick={self.handleSubmit}
-                    > Submit</button>
+                    >Submit</button>
+                    <button
+                        href="javascript:null;"
+                        className={"button small inverted left-padded"}
+                        onClick={self.handleCancel}
+                    >Cancel</button>
                 </div>
                 <div style={childContainerStyle}>
                     {this.props.childrenElement}
