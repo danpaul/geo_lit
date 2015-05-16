@@ -17,7 +17,6 @@ module.exports = React.createClass({
         }
 
         var modalStyle = {
-            // width: '96%',
             margin: '0 auto',
             marginTop: '20px',
             backgroundColor: '#FFF',

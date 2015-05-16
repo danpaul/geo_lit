@@ -1,18 +1,18 @@
-var user = {};
+// var user = {};
 
-user.data = {};
+// user.data = {};
 
-// user.isLoggedIn = false;
-user.isLoggedIn = true;
-user.id = 777;
+// // user.isLoggedIn = false;
+// user.isLoggedIn = true;
+// user.id = 777;
 
-// // stubbed in for testing
-// user.isLoggedIn = function(callback){
-//     callback(null, true;)
-// }
+// // // stubbed in for testing
+// // user.isLoggedIn = function(callback){
+// //     callback(null, true;)
+// // }
 
-// user.getId = function(){
-//     callback(null, 777);
-// }
+// // user.getId = function(){
+// //     callback(null, 777);
+// // }
 
-module.exports = user;
+// module.exports = user;

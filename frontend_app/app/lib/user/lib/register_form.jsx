@@ -1,3 +1,4 @@
+var Alert = require('./alert.jsx');
 var FormInput = require('./input.jsx');
 var servicesHandler = require('./services_handler.js')
 
@@ -6,8 +7,7 @@ module.exports = React.createClass({
     passwordMinLength: 8,
     errorEmail: 'Email address is not valid.',
     errorPasswordsDontMatch: 'The passwords do not match.',
-    errorPasswordLength: 'The password must be at least ' +
-                          this.passwordMinLength + ' characters.',
+    errorPasswordLength: 'The password must be at least 8 characters.',
 
     getInitialState: function(){
         return({errorMessage: ''});
@@ -46,9 +46,7 @@ module.exports = React.createClass({
     render: function(){
         return(
             <div className="sql-login-register">
-                <div className="sql-login-error-message">
-                    {this.state.errorMessage}
-                </div>
+                <Alert message={this.state.errorMessage} />
                 <form method="POST" onSubmit={this.handleSubmit} >
                     <FormInput
                         name="email"

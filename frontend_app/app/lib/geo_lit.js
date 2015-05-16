@@ -37,6 +37,7 @@ geoLit.zoomLevel = 12;
 geoLit.createMap = function(){
     var mapOptions = {
         zoom: geoLit.zoomLevel,
+        disableDefaultUI: true,
         center: new google.maps.LatLng(geoLit.currentLatitude,
                                        geoLit.currentLongitude)
     };

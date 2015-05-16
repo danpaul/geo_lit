@@ -47,11 +47,7 @@ var Main = React.createClass({displayName: "Main",
             activeComponent: 'addPlaceForm',
             placeId: null,
 
-
-
 // TODO: UPDATE THIS!!!
-
-
 
             userId: 1,
             user: null,
@@ -114,7 +110,7 @@ React.createElement("div", {className: "row"},
 
 React.render(React.createElement(Main, null), document.getElementById('content'));
 
-},{"../config":13,"./components/addPlaceForm.jsx":2,"./components/comments.jsx":3,"./lib/geo_lit":4,"./lib/user/index.jsx":7}],2:[function(require,module,exports){
+},{"../config":14,"./components/addPlaceForm.jsx":2,"./components/comments.jsx":3,"./lib/geo_lit":4,"./lib/user/index.jsx":7}],2:[function(require,module,exports){
 var services = require('../lib/services.js');
 var geoLit = require('../lib/geo_lit.js');
 
@@ -342,7 +338,6 @@ var Comment = React.createClass({displayName: "Comment",
         var commentRank = self.props.rank ? self.props.rank : 0;
 
         var createdDate = new Date(self.props.created * 1000).toString();
-console.log(createdDate)
 
         return(
             React.createElement("div", {className: "sql-comment-container"}, 
@@ -400,7 +395,7 @@ console.log(createdDate)
     }
 })
 
-},{"../lib/geo_lit.js":4,"../lib/services.js":5,"underscore":14}],4:[function(require,module,exports){
+},{"../lib/geo_lit.js":4,"../lib/services.js":5,"underscore":15}],4:[function(require,module,exports){
 var geoLit = {};
 
 var _ = require('underscore');
@@ -440,6 +435,7 @@ geoLit.zoomLevel = 12;
 geoLit.createMap = function(){
     var mapOptions = {
         zoom: geoLit.zoomLevel,
+        disableDefaultUI: true,
         center: new google.maps.LatLng(geoLit.currentLatitude,
                                        geoLit.currentLongitude)
     };
@@ -615,7 +611,7 @@ geoLit.addPlace = function(title, callback){
 
 module.exports = geoLit
 
-},{"./services":5,"./user":6,"underscore":14}],5:[function(require,module,exports){
+},{"./services":5,"./user":6,"underscore":15}],5:[function(require,module,exports){
 var services = {}
 var config = require('../../config.js')
 
@@ -662,31 +658,33 @@ services.findNear = function(positionData, callbackIn){
 
 module.exports = services;
 
-},{"../../config.js":13}],6:[function(require,module,exports){
-var user = {};
+},{"../../config.js":14}],6:[function(require,module,exports){
+// var user = {};
 
-user.data = {};
+// user.data = {};
 
-// user.isLoggedIn = false;
-user.isLoggedIn = true;
-user.id = 777;
+// // user.isLoggedIn = false;
+// user.isLoggedIn = true;
+// user.id = 777;
 
-// // stubbed in for testing
-// user.isLoggedIn = function(callback){
-//     callback(null, true;)
-// }
+// // // stubbed in for testing
+// // user.isLoggedIn = function(callback){
+// //     callback(null, true;)
+// // }
 
-// user.getId = function(){
-//     callback(null, 777);
-// }
+// // user.getId = function(){
+// //     callback(null, 777);
+// // }
 
-module.exports = user;
+// module.exports = user;
 
 },{}],7:[function(require,module,exports){
 var FormInput = require('./lib/input.jsx');
 var LoginForm = require('./lib/login_form.jsx');
 var RegisterForm = require('./lib/register_form.jsx');
 var Modal = require('./lib/modal.jsx');
+
+var services = require('./lib/services_handler.js');
 
 var LOGIN_BUTTON_STYLE = {
     position: 'absolute',
@@ -702,11 +700,13 @@ var LOGIN_BUTTON_STYLE = {
 */
 module.exports = React.createClass({displayName: "exports",
     getInitialState: function(){
+        this.loadUser();
         return({
             activeForm: 'login',
             isLoggedIn: false,
             user: null,
-            userFormIsVisible: false
+            userFormIsVisible: false,
+            hasLoaded: false
         });
     },
     handleClose: function(event){
@@ -720,16 +720,47 @@ module.exports = React.createClass({displayName: "exports",
         this.setState({activeForm: 'register'})
     },
     handleLoginButtonClick: function(event){
-        this.setState({userFormIsVisible: true})
+        var self = this;
+        if( !self.state.isLoggedIn ){
+            self.setState({userFormIsVisible: true});
+            return;
+        }
+        services.logout(self.props.endpoint, function(err){
+            if( err ){
+                alert(err);
+                return;
+            }
+            self.setState({isLoggedIn: false}, function(){
+                if( self.props.logoutCallback ){
+                    self.props.logoutCallback();
+                }
+            })
+        });
+    },
+    loadUser: function(){
+        var self = this;
+        services.getUser(self.props.endpoint, function(err, user){
+            if( err ){
+                console.log(err);
+                self.setState({hasLoaded: true})
+                return;
+            }
+            self.setState({isLoggedIn: true, user: user, hasLoaded: true},
+                          function(){
+                if( self.props.loginCallback ){ self.props.loginCallback(user); }
+            });
+        });
     },
     loginCallback: function(user){
-        this.setState({isLoggedIn: true, user: user})
-        if( this.props.loginCallback ){
-            this.props.loginCallback(user);
-        }
+        var self = this;
+        self.setState({isLoggedIn: true, user: user, userFormIsVisible: false},
+                      function(){
+            if( self.props.loginCallback ){ self.props.loginCallback(user); }
+        });
     },
     render: function(){
-        var self = this
+        var self = this;
+        if( !self.state.hasLoaded ){ return null; }
 
         var formVisible = {}
         var forms = ['login', 'register']
@@ -743,7 +774,7 @@ module.exports = React.createClass({displayName: "exports",
                     className: "sql-login-button button tiny", 
                     style: LOGIN_BUTTON_STYLE, 
                     onClick: this.handleLoginButtonClick}, 
-                    "Login"
+                    this.state.isLoggedIn ? 'Logout' : 'Login'
                 ), 
 
                 React.createElement(Modal, {
@@ -780,7 +811,29 @@ module.exports = React.createClass({displayName: "exports",
     }
 });
 
-},{"./lib/input.jsx":8,"./lib/login_form.jsx":9,"./lib/modal.jsx":10,"./lib/register_form.jsx":11}],8:[function(require,module,exports){
+},{"./lib/input.jsx":9,"./lib/login_form.jsx":10,"./lib/modal.jsx":11,"./lib/register_form.jsx":12,"./lib/services_handler.js":13}],8:[function(require,module,exports){
+/**
+* Takes property `message`, will display message if not empty
+* Optionally takes styles (object)
+*/
+module.exports = React.createClass({displayName: "exports",
+    defaultStyles: {
+    },
+    render: function(){
+
+        if( this.props.message === "" ){ return null; }
+
+        var styles = this.props.styles ? this.props.styles : this.defaultStyles;
+
+        return(
+            React.createElement("div", {className: "alert-box alert", style: styles}, 
+                this.props.message
+            )
+        );
+    }
+});
+
+},{}],9:[function(require,module,exports){
 module.exports = React.createClass({displayName: "exports",
 
     getInitialState: function(){
@@ -808,9 +861,10 @@ module.exports = React.createClass({displayName: "exports",
     }
 })
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var FormInput = require('./input.jsx');
-var servicesHandler = require('./services_handler.js')
+var Alert = require('./alert.jsx');
+var servicesHandler = require('./services_handler.js');
 
 module.exports = React.createClass({displayName: "exports",
     getInitialState: function(){
@@ -843,9 +897,7 @@ module.exports = React.createClass({displayName: "exports",
     render: function(){
         return(
             React.createElement("div", {className: "sql-login-login"}, 
-                React.createElement("div", {className: "sql-login-error-message"}, 
-                    this.state.errorMessage
-                ), 
+                React.createElement(Alert, {message: this.state.errorMessage}), 
                 React.createElement("form", {method: "POST", onSubmit: this.handleSubmit}, 
                     React.createElement(FormInput, {
                         name: "email", 
@@ -869,7 +921,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 })
 
-},{"./input.jsx":8,"./services_handler.js":12}],10:[function(require,module,exports){
+},{"./alert.jsx":8,"./input.jsx":9,"./services_handler.js":13}],11:[function(require,module,exports){
 /**
 * should pass properites:
 *   visible: true/false
@@ -889,7 +941,6 @@ module.exports = React.createClass({displayName: "exports",
         }
 
         var modalStyle = {
-            // width: '96%',
             margin: '0 auto',
             marginTop: '20px',
             backgroundColor: '#FFF',
@@ -945,7 +996,8 @@ module.exports = React.createClass({displayName: "exports",
     }
 });
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
+var Alert = require('./alert.jsx');
 var FormInput = require('./input.jsx');
 var servicesHandler = require('./services_handler.js')
 
@@ -954,8 +1006,7 @@ module.exports = React.createClass({displayName: "exports",
     passwordMinLength: 8,
     errorEmail: 'Email address is not valid.',
     errorPasswordsDontMatch: 'The passwords do not match.',
-    errorPasswordLength: 'The password must be at least ' +
-                          this.passwordMinLength + ' characters.',
+    errorPasswordLength: 'The password must be at least 8 characters.',
 
     getInitialState: function(){
         return({errorMessage: ''});
@@ -994,9 +1045,7 @@ module.exports = React.createClass({displayName: "exports",
     render: function(){
         return(
             React.createElement("div", {className: "sql-login-register"}, 
-                React.createElement("div", {className: "sql-login-error-message"}, 
-                    this.state.errorMessage
-                ), 
+                React.createElement(Alert, {message: this.state.errorMessage}), 
                 React.createElement("form", {method: "POST", onSubmit: this.handleSubmit}, 
                     React.createElement(FormInput, {
                         name: "email", 
@@ -1046,12 +1095,18 @@ function validateEmail(email) {
     return re.test(email);
 }
 
-},{"./input.jsx":8,"./services_handler.js":12}],12:[function(require,module,exports){
+},{"./alert.jsx":8,"./input.jsx":9,"./services_handler.js":13}],13:[function(require,module,exports){
 var STATUS_SUCCESS = 'success',
     STATUS_FAILURE = 'failure',
     STATUS_ERROR = 'error';
 
 module.exports = {
+    getUser: function(endpoint, callback){
+        makeRequest({
+            method: 'GET',
+            url: endpoint
+        }, callback);
+    },
     register: function(endpoint, email, password, callback){
         makeRequest({
             method: 'POST',
@@ -1060,7 +1115,7 @@ module.exports = {
                 email: email,
                 password: password
             }            
-        }, callback)
+        }, callback);
     },
     login: function(endpoint, email, password, callback){
         makeRequest({
@@ -1070,7 +1125,13 @@ module.exports = {
                 'email': email,
                 'password': password
             }
-        }, callback)
+        }, callback);
+    },
+    logout: function(endpoint, callback){
+        makeRequest({
+            method: 'POST',
+            url: endpoint + '/logout',
+        }, callback);
     }
 }
 
@@ -1093,7 +1154,7 @@ var makeRequest = function(requestData, callback){
     $.ajax(requestData);
 }
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var config = {};
 
 if( window.location.href.toLowerCase().indexOf('localhost') !==  -1 ){
@@ -1115,7 +1176,7 @@ config.userEndpoint = config.geoLitEndpoint + '/user';
 
 module.exports = config;
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors

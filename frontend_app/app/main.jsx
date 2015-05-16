@@ -46,11 +46,7 @@ var Main = React.createClass({
             activeComponent: 'addPlaceForm',
             placeId: null,
 
-
-
 // TODO: UPDATE THIS!!!
-
-
 
             userId: 1,
             user: null,
