@@ -17,7 +17,7 @@ module.exports = React.createClass({
             },
             success: function(response){
                 if( response.status !== 'success' ){
-                    console.log(response);
+                    self.triggerNotice(response.errorMessage);
                 } else {
                     self.setState({hasLoaded: false});
                     self.loadComments(self.props.placeId);
@@ -29,11 +29,64 @@ module.exports = React.createClass({
             dataType: 'JSON'
         });
     },
+    handleFlag: function(commentId){
+console.log('flaging');
+        // var self = this;
+        // var url = self.props.endpoint + '/comment/vote/' + direction +
+        //                 '/' + commentId;
 
+        // $.ajax({
+        //     type: "POST",
+        //     'url': url,
+        //     data: {
+        //         'userId': self.props.userId
+        //     },
+        //     success: function(response){
+        //         if( response.status !== 'success' ){
+        //             self.triggerNotice(response.errorMessage);
+        //         } else {
+        //             self.triggerNotice('Vote Added');
+        //         }
+        //     },
+        //     error: function(err){
+        //         console.log(err);
+        //     },
+        //     dataType: 'JSON'
+        // });
+
+    },
+    handleVote: function(direction, commentId){
+
+        var self = this;
+        var url = self.props.endpoint + '/comment/vote/' + direction +
+                        '/' + commentId;
+
+        $.ajax({
+            type: "POST",
+            'url': url,
+            data: {
+                'userId': self.props.userId
+            },
+            success: function(response){
+                if( response.status !== 'success' ){
+                    self.triggerNotice(response.errorMessage);
+                } else {
+                    self.triggerNotice('Vote Added');
+                }
+            },
+            error: function(err){
+                console.log(err);
+            },
+            dataType: 'JSON'
+        });
+
+    },
     cleanComments: function(comments){
         var self = this;
         _.each(comments, function(comment){
             comment.addComment = self.addComment;
+            comment.handleVote = self.handleVote;
+            comment.handleFlag = self.handleFlag;
             if( comment.children.length !== 0 ){
                 self.cleanComments(comment.children);
             }
@@ -48,7 +101,28 @@ module.exports = React.createClass({
     },
 
     getInitialState: function(){
-        return({ hasLoaded: false, comments: [] });
+        return({ hasLoaded: false, comments: [] , notice: null});
+    },
+
+    triggerNotice: function(message){
+        var self = this;
+        var noticeElement =
+            <div
+                style={{
+                    position: 'fixed',
+                    top: '10px',
+                    right: '10px',
+                    zIndex: '1000'
+                }}
+                className={"alert-box alert"} >
+                {message}
+            </div>;
+
+        self.setState({notice: noticeElement}, function(){
+            setTimeout(function(){
+                self.setState({notice: null});
+            }, 2000)
+        });
     },
 
     loadComments: function(placeId){
@@ -74,6 +148,7 @@ module.exports = React.createClass({
         });
     },
     render: function(){
+        var self = this;
 
         var addPlaceButtonClasses = 'js-add-place button expand';
 
@@ -82,18 +157,11 @@ module.exports = React.createClass({
         } else {
             return(
                 <div>
+                    {self.state.notice}
                     < Comment 
                         children={[]}
                         isTopLevel={true}
                         addComment={this.addComment} />
-                    <Comments
-                        comments={[{
-                            parent: 0,
-                            children: [],
-                            comment: '',
-                            addComment: this.addComment
-                        }]} />
-                    <h2> </h2>
                     <Comments comments={this.state.comments} />
                 </div>);
         }
@@ -108,25 +176,26 @@ var Comments = React.createClass({
         var self = this;
 
         var comments = this.props.comments.map(function(comment, index){
+
             var isOpen = false;
             if( comment.comment === null ){ isOpen = true; }
             var commentChildren = '';
-
             if( comment.children.length !== 0 ){
                 commentChildren = <Comments comments={comment.children} />;
             }
-
             return(
                 < Comment 
-                    parent={comment.id}
-                    childrenElement={commentChildren}
-                    children={comment.children}
-                    comment={comment.comment}
                     addComment={comment.addComment}
+                    children={comment.children}
+                    childrenElement={commentChildren}                    
+                    comment={comment.comment}                    
                     created={comment.created}
-                    rank={comment.rank}
+                    handleVote={comment.handleVote}
+                    handleFlag={comment.handleFlag}
+                    id={comment.id}
+                    isTopLevel={false}
                     key={index}
-                    isTopLevel={false} />
+                    rank={comment.rank} />
             );
         });
 
@@ -154,7 +223,7 @@ var Comment = React.createClass({
     },
     handleSubmit: function(){
         event.preventDefault();
-        this.props.addComment(this.props.parent, this.state.comment);
+        this.props.addComment(this.props.id, this.state.comment);
     },
     handleToggleChilren: function(){
         var nextState = !this.state.showChildren;
@@ -165,6 +234,19 @@ var Comment = React.createClass({
         var nextState = !this.state.showCommentForm;
         this.setState({showCommentForm: nextState});
     },
+
+    handleUpvote: function(){
+        this.props.handleVote('up', this.props.id);
+    },
+
+    handleFlag: function(){
+        this.props.handleFlag(this.props.id);
+    },
+
+    handleDownvote: function(){
+        this.props.handleVote('down', this.props.id);
+    },
+
     render: function(){
 
         var self = this;
@@ -231,6 +313,9 @@ var Comment = React.createClass({
                     </a>&nbsp;-&nbsp;
                     <a onClick={this.handleDownvote}>
                         downvote
+                    </a>&nbsp;-&nbsp;
+                    <a onClick={this.handleFlag}>
+                        flag
                     </a>&nbsp;-&nbsp;
                     <a onClick={this.handleToggleCommentForm}>
                         comment
