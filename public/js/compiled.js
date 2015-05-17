@@ -249,6 +249,8 @@ module.exports = React.createClass({displayName: "exports",
 },{"../lib/geo_lit.js":4,"../lib/services.js":5,"../lib/user/lib/alert.jsx":8,"../lib/user/lib/modal.jsx":11}],3:[function(require,module,exports){
 var _ = require('underscore');
 
+var SERVER_ERROR_MESSAGE = 'A server error occurred.';
+
 module.exports = React.createClass({displayName: "exports",
 
     addComment: function(parentId, comment){
@@ -261,8 +263,7 @@ module.exports = React.createClass({displayName: "exports",
             type: "POST",
             'url': url,
             data: {
-                'comment': comment,
-                'userId': this.props.userId
+                'comment': comment
             },
             success: function(response){
                 if( response.status !== 'success' ){
@@ -274,34 +275,34 @@ module.exports = React.createClass({displayName: "exports",
             },
             error: function(err){
                 console.log(err);
+                self.triggerNotice(SERVER_ERROR_MESSAGE);
             },
             dataType: 'JSON'
         });
     },
-    handleFlag: function(commentId){
-console.log('flaging');
-        // var self = this;
-        // var url = self.props.endpoint + '/comment/vote/' + direction +
-        //                 '/' + commentId;
 
-        // $.ajax({
-        //     type: "POST",
-        //     'url': url,
-        //     data: {
-        //         'userId': self.props.userId
-        //     },
-        //     success: function(response){
-        //         if( response.status !== 'success' ){
-        //             self.triggerNotice(response.errorMessage);
-        //         } else {
-        //             self.triggerNotice('Vote Added');
-        //         }
-        //     },
-        //     error: function(err){
-        //         console.log(err);
-        //     },
-        //     dataType: 'JSON'
-        // });
+// asdf
+    handleFlag: function(commentId){
+
+        var self = this;
+        var url = self.props.endpoint + '/flag/' + commentId;
+
+        $.ajax({
+            type: "POST",
+            'url': url,
+            success: function(response){
+console.log(response);
+                if( response.status !== 'success' ){
+                    self.triggerNotice(response.errorMessage);
+                } else {
+                    self.triggerNotice('Comment Flagged');
+                }
+            },
+            error: function(err){
+                self.triggerNotice(SERVER_ERROR_MESSAGE);
+            },
+            dataType: 'JSON'
+        });
 
     },
     handleVote: function(direction, commentId){
@@ -313,9 +314,6 @@ console.log('flaging');
         $.ajax({
             type: "POST",
             'url': url,
-            data: {
-                'userId': self.props.userId
-            },
             success: function(response){
                 if( response.status !== 'success' ){
                     self.triggerNotice(response.errorMessage);
@@ -324,7 +322,7 @@ console.log('flaging');
                 }
             },
             error: function(err){
-                console.log(err);
+                self.triggerNotice(SERVER_ERROR_MESSAGE);
             },
             dataType: 'JSON'
         });
@@ -360,8 +358,7 @@ console.log('flaging');
                 style: {
                     position: 'fixed',
                     top: '10px',
-                    right: '10px',
-                    zIndex: '1000'
+                    right: '10px'
                 }, 
                 className: "alert-box alert"}, 
                 message

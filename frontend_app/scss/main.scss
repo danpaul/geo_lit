@@ -32,15 +32,6 @@ button.inverted:hover, button.inverted:focus{
     margin-left: 5px;
 }
 
-// button.inv {
-//     background-color: rgba(0, 0, 0, 0.31);
-//     border-radius: 2px;
-//     border-color: rgba(255, 255, 255, 0.31);
-//     border-width: 1px;
-// }
-
-
-
 a{
     color: red;
 }
@@ -59,18 +50,4 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 .sql-comment-comment-meta{
     font-size: 12px;
     font-weight: bold;
-}
-
-//.sql-comment-container:nth-child(odd){
-//    background-color: red;
-//}
-
-
-.example-enter {
-  opacity: 0.01;
-  transition: opacity .5s ease-in;
-}
-
-.example-enter.example-enter-active {
-  opacity: 1;
 }
