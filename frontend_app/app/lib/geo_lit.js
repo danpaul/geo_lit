@@ -98,7 +98,7 @@ geoLit.addPlacesToMap = function(places){
         google.maps.event.addListener(geoLit.placeMarkers[place._id],
                                     'click',
                                     function(){
-
+console.log('here')
             $(document).trigger('geo-lit-place-click', [this.geoLit]);
         });
     })
@@ -176,13 +176,6 @@ geoLit.intervalCallback = function(){
 // add place with title to map
 geoLit.addPlace = function(title, callback){
 
-
-
-    if( !user.isLoggedIn ){
-        callback(ERROR_USER_NOT_LOGGED_IN);
-        return;
-    }
-
     geoLit.getPosition(function(err, location){
         if( err ){
             callback('Unable to find location.');
@@ -191,24 +184,13 @@ geoLit.addPlace = function(title, callback){
 
         var placeObject = {};
         placeObject.location = [location.longitude, location.latitude];
-
-// console.log(place);
         placeObject.title = title;
         placeObject.user = user.id;
         services.add(placeObject, function(err, resp){
-// console.log('asdfasdfasdf')
-// console.log(resp);
-// console.log(err);
             if( err ){ callback(err); }
-            else { callback(); }
+            else { callback(null, resp); }
         })
     })
-// console.log(geoLit.getPosition());
-// console.log(callback);
-// return;
-
-
-
 }
 
 module.exports = geoLit

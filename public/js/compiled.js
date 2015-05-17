@@ -29,27 +29,43 @@ var UserForm = require('./lib/user/index.jsx');
 
 var Main = React.createClass({displayName: "Main",
 
-    componentDidMount: function(){
-
+    // called on success when new place is added
+    addPlaceCallback: function(place){
         var self = this;
+        self.setState({
+            activeComponent: 'comments',
+            placeId: place._id,
+            placeTitle: place.title
+        });
+    },
 
+    componentDidMount: function(){
+        var self = this;
         $(document).on('geo-lit-place-click', function(event, args){
+// console.log(args)
             self.setState({
                 activeComponent: 'comments',
                 placeId: args._id,
                 placeTitle: args.title,
             })
         });
+
+
+this.setState({
+    activeComponent: 'comments',
+    placeId: '5556b2cab32d7ae70ec8a914',
+    placeTitle: 'TEST TITLE',
+});
+// asdf
+// {_id: "5556b2cab32d7ae70ec8a914", title: "TEST TITLE"}
+
     },
 
     getInitialState: function(){
         return {
             activeComponent: 'addPlaceForm',
             placeId: null,
-
-// TODO: UPDATE THIS!!!
-
-            userId: 1,
+            userId: null,
             user: null,
             isLoggedIn: false
         };
@@ -58,6 +74,7 @@ var Main = React.createClass({displayName: "Main",
     loginCallback: function(user){
         this.setState({
             user: user,
+            userId: user.id,
             isLoggedIn: true
         })
     },
@@ -65,30 +82,29 @@ var Main = React.createClass({displayName: "Main",
     logoutCallback: function(){
         this.setState({
             user: null,
+            userId: null,
             isLoggedIn: false
         })
     },
 
-    componentDidMount: function(){
-
-// asdf TODO: REMOVE THIS!!!
-this.setState({
-    activeComponent: 'comments',
-    placeId: '554d73c2cae7eb0a05f467c8',
-    placeTitle: 'test',
-});
-
-    },
-
     render: function(){
+        var self = this;
+
+        var addPlaceElement = null;
+        if( self.state.isLoggedIn ){
+            addPlaceElement = React.createElement(AddPlaceForm, {
+                                activeComponent: self.state.activeComponent, 
+                                addPlaceCallback: self.addPlaceCallback});
+        }
+
         return(
             React.createElement("div", null, 
                 React.createElement(UserForm, {
                     endpoint: config.userEndpoint, 
                     loginCallback: this.loginCallback, 
                     logoutCallback: this.logoutCallback}), 
-                React.createElement(AddPlaceForm, {
-                    activeComponent: this.state.activeComponent}), 
+                 addPlaceElement, 
+
 React.createElement("div", {className: "row"}, 
     React.createElement("div", {className: "small-12 columns"}, 
 
@@ -114,43 +130,109 @@ React.render(React.createElement(Main, null), document.getElementById('content')
 var services = require('../lib/services.js');
 var geoLit = require('../lib/geo_lit.js');
 
+var Modal = require('../lib/user/lib/modal.jsx');
+var Alert = require('../lib/user/lib/alert.jsx');
+
+var ERROR_TITLE_TOO_SHORT = 'Place title is not long enough.';
+
+var BUTTON_STYLE = {
+    position: 'absolute',
+    top: '5px',
+    left: '5px'
+}
+
 module.exports = React.createClass({displayName: "exports",
+
+    validation: {
+        minPlaceLength: 4
+    },
 
     addPlace: function(event){
         var self = this;
         event.preventDefault();
-        geoLit.addPlace(this.state.placeValue, function(errorMessage){
+
+        var placeTitle = this.state.placeValue;
+        var placeTitleValidation = this.validatePlace(placeTitle);
+
+        if( placeTitleValidation !== true ){
+            self.setState({errorMessage: placeTitleValidation});
+            return;
+        }
+
+        geoLit.addPlace(this.state.placeValue, function(errorMessage, place){
             if( errorMessage ){
                 self.setState({'errorMessage': errorMessage});
             } else {
-                console.log(self.state.placeValue + ' added.');
+                if( self.props.addPlaceCallback ){
+                    self.setState({
+                            errorMessage: '',
+                            placeValue: '',
+                            modalVisible: false}, function(){
+
+                        if( self.props.addPlaceCallback ){
+                            self.props.addPlaceCallback(place);
+                        }
+                    });
+                }
             }
         })
     },
 
     getInitialState: function(){
-        return({ placeValue: '', errorMessage: ''});
+        return({ placeValue: '', errorMessage: '', modalVisible: false});
+    },
+
+    handleModalClose: function(){
+        this.setState({modalVisible: false});
+    },
+
+    handleShowFormClick: function(e){
+        this.setState({modalVisible: true});
+    },
+
+    // returns true if valid, else string error message
+    validatePlace: function(placeTitle){
+        if( placeTitle.trim().length < this.validation.minPlaceLength ){
+            return ERROR_TITLE_TOO_SHORT;
+        }
+        return true;
     },
 
     render: function(){
+        var self = this;
         var addPlaceButtonClasses = 'js-add-place button expand';
+
+        if( self.props.activeComponent !== '' )
 
         return(
             React.createElement("div", null, 
-                React.createElement("div", null, this.state.errorMessage), 
-                React.createElement("form", null, 
-                    React.createElement("div", {className: "row"}, 
-                        React.createElement("div", {className: "small-12 columns"}, 
-                            React.createElement("input", {
-                                type: "text", 
-                                name: "title", 
-                                placeholder: "Title", 
-                                value: this.state.placeValue, 
-                                onChange: this.updatePlaceValue}), 
-                            React.createElement("a", {
-                                href: "javascript:void(0)", 
-                                onClick: this.addPlace, 
-                                className: addPlaceButtonClasses}, "Add Place")
+                React.createElement("button", {
+                    className: "sql-login-button button tiny", 
+                    style: BUTTON_STYLE, 
+                    onClick: this.handleShowFormClick}, 
+                    "Add Place"
+                ), 
+                React.createElement(Modal, {
+                    visible: this.state.modalVisible, 
+                    handleClose: this.handleModalClose}, 
+                    React.createElement(Alert, {message: this.state.errorMessage}), 
+                    React.createElement("form", null, 
+                        React.createElement("div", {className: "row"}, 
+                            React.createElement("div", {className: "small-12 columns"}, 
+                                React.createElement("input", {
+                                    type: "text", 
+                                    name: "title", 
+                                    placeholder: "Title", 
+                                    value: this.state.placeValue, 
+                                    onChange: this.updatePlaceValue}), 
+                                React.createElement("a", {
+                                    href: "javascript:void(0)", 
+                                    onClick: this.addPlace, 
+                                    className: addPlaceButtonClasses
+                                }, 
+                                    "Add Place"
+                                )
+                            )
                         )
                     )
                 )
@@ -164,10 +246,8 @@ module.exports = React.createClass({displayName: "exports",
 
 });
 
-},{"../lib/geo_lit.js":4,"../lib/services.js":5}],3:[function(require,module,exports){
+},{"../lib/geo_lit.js":4,"../lib/services.js":5,"../lib/user/lib/alert.jsx":8,"../lib/user/lib/modal.jsx":11}],3:[function(require,module,exports){
 var _ = require('underscore');
-var services = require('../lib/services.js');
-var geoLit = require('../lib/geo_lit.js');
 
 module.exports = React.createClass({displayName: "exports",
 
@@ -247,10 +327,14 @@ module.exports = React.createClass({displayName: "exports",
         var addPlaceButtonClasses = 'js-add-place button expand';
 
         if(this.props.activeComponent !== 'comments' || !this.state.hasLoaded){
-            return(React.createElement("div", null, " "));
+            return(null);
         } else {
             return(
                 React.createElement("div", null, 
+                    React.createElement(Comment, {
+                        children: [], 
+                        isTopLevel: true, 
+                        addComment: this.addComment}), 
                     React.createElement(Comments, {
                         comments: [{
                             parent: 0,
@@ -288,11 +372,10 @@ var Comments = React.createClass({displayName: "Comments",
                     children: comment.children, 
                     comment: comment.comment, 
                     addComment: comment.addComment, 
-                    // upVotes={comment.up_vote}
-                    // downVotes={comment.down_vote}
                     created: comment.created, 
                     rank: comment.rank, 
-                    key: index})
+                    key: index, 
+                    isTopLevel: false})
             );
         });
 
@@ -306,10 +389,17 @@ var Comments = React.createClass({displayName: "Comments",
 var Comment = React.createClass({displayName: "Comment",
 
     getInitialState: function(){
-        return({comment: '', showCommentForm: false, showChildren: true});
+        return({
+            comment: '',
+            showCommentForm: false,
+            showControls: false,
+            showChildren: true});
     },
     handleCancel: function(){
         this.setState({showCommentForm: false});
+    },
+    handleShowControl: function(){
+        this.setState({showControls: !this.state.showControls});
     },
     handleSubmit: function(){
         event.preventDefault();
@@ -317,7 +407,8 @@ var Comment = React.createClass({displayName: "Comment",
     },
     handleToggleChilren: function(){
         var nextState = !this.state.showChildren;
-        this.setState({showChildren: nextState});
+        this.setState({
+            showChildren: nextState, showControls: false});
     },
     handleToggleCommentForm: function(){
         var nextState = !this.state.showCommentForm;
@@ -327,8 +418,14 @@ var Comment = React.createClass({displayName: "Comment",
 
         var self = this;
 
-        var commentFormStyle = this.state.showCommentForm ?
-                {display: 'block'} : {display: 'none'};
+        var commentFormStyle = this.state.showCommentForm &&
+                               this.state.showControls ?
+                                    {display: 'block', marginTop: '10px'} :
+                                    {display: 'none'};
+
+        if( self.props.isTopLevel ){
+            commentFormStyle = {display: 'block', marginTop: '10px'};
+        }
 
         var toggleCharacter = self.state.showChildren ? '-' : '+';
         var childContainerStyle = self.state.showChildren ?
@@ -338,15 +435,18 @@ var Comment = React.createClass({displayName: "Comment",
         var commentRank = self.props.rank ? self.props.rank : 0;
 
         var createdDate = new Date(self.props.created * 1000).toString();
+        var hasChildren = this.props.children.length > 0;
 
         return(
-            React.createElement("div", {className: "sql-comment-container"}, 
-                React.createElement("div", {className: "sql-comment-comment-meta"}, 
-                    React.createElement("span", {style: toggleButtonStle}, 
-                        "[", React.createElement("a", {onClick: this.handleToggleChilren}, 
-                            toggleCharacter
-                        ), "]"
-                    ), 
+            React.createElement("div", {
+                className: "sql-comment-container", 
+                style: {marginTop: '10px'}}, 
+
+                React.createElement("div", {
+                    className: "sql-comment-comment-meta", 
+                    style:  self.props.isTopLevel ?
+                        {display: 'none'} : {marginTop: '10px'}
+                }, 
                     React.createElement("span", {className: "sql-comment-username"}, 
                         "danpaul"
                     ), " -",  
@@ -362,12 +462,38 @@ var Comment = React.createClass({displayName: "Comment",
                         commentRank
                     )
                 ), 
-                React.createElement("div", null, this.props.comment), 
-                React.createElement("div", {style: !this.state.showCommentForm ? {display: 'block'} : {display: 'none'}}, 
+                React.createElement("div", {
+                    style: {cursor: 'pointer'}, 
+                    onClick: self.handleShowControl
+                }, 
+                    this.props.comment
+                ), 
+                React.createElement("div", {style:  this.state.showControls ?
+                                {display: 'block'} : {display: 'none'}}
+
+                ), 
+                React.createElement("div", {style:  this.state.showControls ?
+                                {display: 'block'} : {display: 'none'}}, 
+
+                    React.createElement("a", {onClick: this.handleUpvote}, 
+                        "upvote"
+                    ), " - ", 
+                    React.createElement("a", {onClick: this.handleDownvote}, 
+                        "downvote"
+                    ), " - ", 
                     React.createElement("a", {onClick: this.handleToggleCommentForm}, 
                         "comment"
+                    ), 
+                    React.createElement("span", {style:  hasChildren ?
+                        {display: 'inline'} : {display: 'none'}}, 
+
+                        " - ", 
+                        React.createElement("a", {onClick: this.handleToggleChilren}, 
+                             this.state.showChildren ? 'collapse' : 'reveal'
+                        )
                     )
                 ), 
+
                 React.createElement("div", {style: commentFormStyle}, 
                     React.createElement("textarea", {
                         placeholder: "Add Comment", 
@@ -384,6 +510,7 @@ var Comment = React.createClass({displayName: "Comment",
                         onClick: self.handleCancel
                     }, "Cancel")
                 ), 
+
                 React.createElement("div", {style: childContainerStyle}, 
                     this.props.childrenElement
                 )
@@ -393,9 +520,40 @@ var Comment = React.createClass({displayName: "Comment",
     updateComment: function(event){
         this.setState({comment: event.target.value});
     }
-})
+});
 
-},{"../lib/geo_lit.js":4,"../lib/services.js":5,"underscore":15}],4:[function(require,module,exports){
+var FadeAlert = React.createClass({displayName: "FadeAlert",
+    alertStyle: {
+        position: 'absolute',
+        top: '20px',
+        right: '20px',
+        background: 'rgba(255, 0, 0, 0.2',
+        display: 'block',
+        color: '#FFFFFF'
+    },
+
+    fadeOutTime: 2000,
+
+    triggerFadeOut: function(){
+
+        $('#sql-comment-alert-box').fadeOut(this.fadeOutTime);
+    },
+
+    render: function(){
+        if( this.props.message === '' ){
+            return null;
+        }
+        this.triggerFadeOut();
+        return(
+            React.createElement("div", {id: "sql-comment-alert-box", style: this.alertStyle}, 
+            "asdfasdfasdfasdf", 
+                this.props.message
+            )
+        );
+    }
+});
+
+},{"underscore":15}],4:[function(require,module,exports){
 var geoLit = {};
 
 var _ = require('underscore');
@@ -496,7 +654,7 @@ geoLit.addPlacesToMap = function(places){
         google.maps.event.addListener(geoLit.placeMarkers[place._id],
                                     'click',
                                     function(){
-
+console.log('here')
             $(document).trigger('geo-lit-place-click', [this.geoLit]);
         });
     })
@@ -574,13 +732,6 @@ geoLit.intervalCallback = function(){
 // add place with title to map
 geoLit.addPlace = function(title, callback){
 
-
-
-    if( !user.isLoggedIn ){
-        callback(ERROR_USER_NOT_LOGGED_IN);
-        return;
-    }
-
     geoLit.getPosition(function(err, location){
         if( err ){
             callback('Unable to find location.');
@@ -589,24 +740,13 @@ geoLit.addPlace = function(title, callback){
 
         var placeObject = {};
         placeObject.location = [location.longitude, location.latitude];
-
-// console.log(place);
         placeObject.title = title;
         placeObject.user = user.id;
         services.add(placeObject, function(err, resp){
-// console.log('asdfasdfasdf')
-// console.log(resp);
-// console.log(err);
             if( err ){ callback(err); }
-            else { callback(); }
+            else { callback(null, resp); }
         })
     })
-// console.log(geoLit.getPosition());
-// console.log(callback);
-// return;
-
-
-
 }
 
 module.exports = geoLit
@@ -622,9 +762,9 @@ services.add = function(positionData, callbackIn){
         type: "POST",
         url: config.geoLitEndpoint + '/position',
         data: positionData,
-        success: function(data){
-            if( data.status === 'success' ){
-                callbackIn();
+        success: function(response){
+            if( response.status === 'success' ){
+                callbackIn(null, response.data);
             } else {
                 callbackIn(data.errorMessage);
             }
@@ -689,14 +829,14 @@ var services = require('./lib/services_handler.js');
 var LOGIN_BUTTON_STYLE = {
     position: 'absolute',
     top: '5px',
-    left: '5px'
+    right: '5px'
 }
 
 /**
 * Require the following props:
-*   endpoint[sql_login endpoint],
-*   loginCallback[function called afer login, passed user object]
-*   logoutCallback[function called afer logout]
+*   endpoint (sql_login endpoint),
+*   loginCallback (function called afer login, passed user object)
+*   logoutCallback (function called afer logout)
 */
 module.exports = React.createClass({displayName: "exports",
     getInitialState: function(){
@@ -967,7 +1107,7 @@ module.exports = React.createClass({displayName: "exports",
         var modalSize = this.props.size ? this.props.size : 'small';
         var modalClasses = '';
         if( modalSize === 'small' ){
-            modalClasses = 'small-12 medium-6 large-4';
+            modalClasses = 'small-12 medium-8 large-6';
         } else if( modalSize === 'medium' ){
             modalClasses = 'small-12 medium-10 large-8';
         } else {

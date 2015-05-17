@@ -8,14 +8,14 @@ var services = require('./lib/services_handler.js');
 var LOGIN_BUTTON_STYLE = {
     position: 'absolute',
     top: '5px',
-    left: '5px'
+    right: '5px'
 }
 
 /**
 * Require the following props:
-*   endpoint[sql_login endpoint],
-*   loginCallback[function called afer login, passed user object]
-*   logoutCallback[function called afer logout]
+*   endpoint (sql_login endpoint),
+*   loginCallback (function called afer login, passed user object)
+*   logoutCallback (function called afer logout)
 */
 module.exports = React.createClass({
     getInitialState: function(){

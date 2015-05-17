@@ -1,2 +1,3 @@
+* confirm back end for geo_lit requires auth
 * Add geo_lit to package.json after finished developing
 * Add sql_login_middleware to package.json after finished developing

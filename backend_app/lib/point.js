@@ -51,7 +51,7 @@ module.exports = function(options){
         var point = new Point(locationData)
         point.save(function(err){
             if( err ){ callbackIn(err) }
-            else { callbackIn() }
+            else { callbackIn(null, point); }
         })
     }
 

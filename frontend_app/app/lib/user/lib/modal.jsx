@@ -43,7 +43,7 @@ module.exports = React.createClass({
         var modalSize = this.props.size ? this.props.size : 'small';
         var modalClasses = '';
         if( modalSize === 'small' ){
-            modalClasses = 'small-12 medium-6 large-4';
+            modalClasses = 'small-12 medium-8 large-6';
         } else if( modalSize === 'medium' ){
             modalClasses = 'small-12 medium-10 large-8';
         } else {

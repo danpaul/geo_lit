@@ -8,9 +8,9 @@ services.add = function(positionData, callbackIn){
         type: "POST",
         url: config.geoLitEndpoint + '/position',
         data: positionData,
-        success: function(data){
-            if( data.status === 'success' ){
-                callbackIn();
+        success: function(response){
+            if( response.status === 'success' ){
+                callbackIn(null, response.data);
             } else {
                 callbackIn(data.errorMessage);
             }

@@ -1,33 +1,33 @@
-var comment = {}
+// var comment = {}
 
-var config = require('../../config.js');
+// var config = require('../../config.js');
 
-var endPoint = config.geoLitEndpoint + '/discussion';
+// var endPoint = config.geoLitEndpoint + '/discussion';
 
-// commentObject should include: location, parent, userId, comment
-comment.add = function(commentObject, callbackIn){
+// // commentObject should include: location, parent, userId, comment
+// comment.add = function(commentObject, callbackIn){
 
-    var url = endPoint + '/' +
-              commentObject.location + '/' +
-              commentObject.parent
+//     var url = endPoint + '/' +
+//               commentObject.location + '/' +
+//               commentObject.parent
 
-    var postData = {
-        userId: commentObject.userId,
-        comment: commentObject.comment
-    }
+//     var postData = {
+//         userId: commentObject.userId,
+//         comment: commentObject.comment
+//     }
 
-    $.ajax({
-        type: "POST",
-        url: config.geoLitEndpoint + '/position',
-        data: positionData,
-        success: function(data){ callbackIn() },
-        error: function(err){
-            console.log(err)
-            callbackIn(SERVER_ERROR)
-        },
-        dataType: 'JSON'
-    });
-}
+//     $.ajax({
+//         type: "POST",
+//         url: config.geoLitEndpoint + '/position',
+//         data: positionData,
+//         success: function(data){ callbackIn() },
+//         error: function(err){
+//             console.log(err)
+//             callbackIn(SERVER_ERROR)
+//         },
+//         dataType: 'JSON'
+//     });
+// }
 
 
-module.exports = comment
+// module.exports = comment

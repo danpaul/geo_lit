@@ -73,15 +73,14 @@ module.exports = function(app){
         var pointData = req.body
         //TODO: validation
 
-        point.add(pointData, function(err){
+        point.add(pointData, function(err, point){
             if( err ){
                 console.log(err)
                 responseObject.status = 'error'
+            } else {
+                responseObject.data = point;
             }
-    console.log(responseObject);
             res.json(responseObject)
-        })
-
-        
+        })        
     })
 }

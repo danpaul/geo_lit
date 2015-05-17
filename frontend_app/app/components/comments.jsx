@@ -1,6 +1,4 @@
 var _ = require('underscore');
-var services = require('../lib/services.js');
-var geoLit = require('../lib/geo_lit.js');
 
 module.exports = React.createClass({
 
@@ -80,10 +78,14 @@ module.exports = React.createClass({
         var addPlaceButtonClasses = 'js-add-place button expand';
 
         if(this.props.activeComponent !== 'comments' || !this.state.hasLoaded){
-            return(<div> </div>);
+            return(null);
         } else {
             return(
                 <div>
+                    < Comment 
+                        children={[]}
+                        isTopLevel={true}
+                        addComment={this.addComment} />
                     <Comments
                         comments={[{
                             parent: 0,
@@ -121,11 +123,10 @@ var Comments = React.createClass({
                     children={comment.children}
                     comment={comment.comment}
                     addComment={comment.addComment}
-                    // upVotes={comment.up_vote}
-                    // downVotes={comment.down_vote}
                     created={comment.created}
                     rank={comment.rank}
-                    key={index} />
+                    key={index}
+                    isTopLevel={false} />
             );
         });
 
@@ -139,10 +140,17 @@ var Comments = React.createClass({
 var Comment = React.createClass({
 
     getInitialState: function(){
-        return({comment: '', showCommentForm: false, showChildren: true});
+        return({
+            comment: '',
+            showCommentForm: false,
+            showControls: false,
+            showChildren: true});
     },
     handleCancel: function(){
         this.setState({showCommentForm: false});
+    },
+    handleShowControl: function(){
+        this.setState({showControls: !this.state.showControls});
     },
     handleSubmit: function(){
         event.preventDefault();
@@ -150,7 +158,8 @@ var Comment = React.createClass({
     },
     handleToggleChilren: function(){
         var nextState = !this.state.showChildren;
-        this.setState({showChildren: nextState});
+        this.setState({
+            showChildren: nextState, showControls: false});
     },
     handleToggleCommentForm: function(){
         var nextState = !this.state.showCommentForm;
@@ -160,8 +169,14 @@ var Comment = React.createClass({
 
         var self = this;
 
-        var commentFormStyle = this.state.showCommentForm ?
-                {display: 'block'} : {display: 'none'};
+        var commentFormStyle = this.state.showCommentForm &&
+                               this.state.showControls ?
+                                    {display: 'block', marginTop: '10px'} :
+                                    {display: 'none'};
+
+        if( self.props.isTopLevel ){
+            commentFormStyle = {display: 'block', marginTop: '10px'};
+        }
 
         var toggleCharacter = self.state.showChildren ? '-' : '+';
         var childContainerStyle = self.state.showChildren ?
@@ -171,15 +186,18 @@ var Comment = React.createClass({
         var commentRank = self.props.rank ? self.props.rank : 0;
 
         var createdDate = new Date(self.props.created * 1000).toString();
+        var hasChildren = this.props.children.length > 0;
 
         return(
-            <div className="sql-comment-container">
-                <div className="sql-comment-comment-meta">
-                    <span style={toggleButtonStle}>
-                        [<a onClick={this.handleToggleChilren}>
-                            {toggleCharacter}
-                        </a>]
-                    </span>
+            <div
+                className="sql-comment-container"
+                style={{marginTop: '10px'}} >
+
+                <div
+                    className="sql-comment-comment-meta"
+                    style={ self.props.isTopLevel ?
+                        {display: 'none'} : {marginTop: '10px'}}
+                >
                     <span className="sql-comment-username">
                         danpaul
                     </span> - 
@@ -195,12 +213,38 @@ var Comment = React.createClass({
                         {commentRank}
                     </span>
                 </div>
-                <div>{this.props.comment}</div>
-                <div style={!this.state.showCommentForm ? {display: 'block'} : {display: 'none'}}>
+                <div
+                    style={{cursor: 'pointer'}}
+                    onClick={self.handleShowControl}
+                >
+                    {this.props.comment}
+                </div>
+                <div style={ this.state.showControls ?
+                                {display: 'block'} : {display: 'none'}} >
+
+                </div>
+                <div style={ this.state.showControls ?
+                                {display: 'block'} : {display: 'none'}}>
+
+                    <a onClick={this.handleUpvote}>
+                        upvote
+                    </a>&nbsp;-&nbsp;
+                    <a onClick={this.handleDownvote}>
+                        downvote
+                    </a>&nbsp;-&nbsp;
                     <a onClick={this.handleToggleCommentForm}>
                         comment
                     </a>
+                    <span style={ hasChildren ?
+                        {display: 'inline'} : {display: 'none'}}>
+
+                        &nbsp;-&nbsp;
+                        <a onClick={this.handleToggleChilren}>
+                            { this.state.showChildren ? 'collapse' : 'reveal' }
+                        </a>
+                    </span>
                 </div>
+
                 <div style={commentFormStyle}>
                     <textarea
                         placeholder="Add Comment"
@@ -217,6 +261,7 @@ var Comment = React.createClass({
                         onClick={self.handleCancel}
                     >Cancel</button>
                 </div>
+
                 <div style={childContainerStyle}>
                     {this.props.childrenElement}
                 </div>
@@ -226,4 +271,35 @@ var Comment = React.createClass({
     updateComment: function(event){
         this.setState({comment: event.target.value});
     }
-})
+});
+
+var FadeAlert = React.createClass({
+    alertStyle: {
+        position: 'absolute',
+        top: '20px',
+        right: '20px',
+        background: 'rgba(255, 0, 0, 0.2',
+        display: 'block',
+        color: '#FFFFFF'
+    },
+
+    fadeOutTime: 2000,
+
+    triggerFadeOut: function(){
+
+        $('#sql-comment-alert-box').fadeOut(this.fadeOutTime);
+    },
+
+    render: function(){
+        if( this.props.message === '' ){
+            return null;
+        }
+        this.triggerFadeOut();
+        return(
+            <div id="sql-comment-alert-box" style={this.alertStyle}>
+            asdfasdfasdfasdf
+                {this.props.message}
+            </div>
+        );
+    }
+});
