@@ -4,6 +4,8 @@
 
 *******************************************************************************/
 
+var Modal = require('./lib/user/lib/modal.jsx');
+
 var MAP_ID = 'map-canvas'
 
 var geoLit = require('./lib/geo_lit');
@@ -41,23 +43,12 @@ var Main = React.createClass({
     componentDidMount: function(){
         var self = this;
         $(document).on('geo-lit-place-click', function(event, args){
-// console.log(args)
             self.setState({
                 activeComponent: 'comments',
                 placeId: args._id,
                 placeTitle: args.title,
             })
         });
-
-
-this.setState({
-    activeComponent: 'comments',
-    placeId: '5556b2cab32d7ae70ec8a914',
-    placeTitle: 'TEST TITLE',
-});
-// asdf
-// {_id: "5556b2cab32d7ae70ec8a914", title: "TEST TITLE"}
-
     },
 
     getInitialState: function(){
@@ -68,6 +59,10 @@ this.setState({
             user: null,
             isLoggedIn: false
         };
+    },
+
+    handleCommentModalClose: function(){
+        this.setState({activeComponent: null});
     },
 
     loginCallback: function(user){
@@ -91,9 +86,29 @@ this.setState({
 
         var addPlaceElement = null;
         if( self.state.isLoggedIn ){
-            addPlaceElement = <AddPlaceForm
-                                activeComponent={self.state.activeComponent}
-                                addPlaceCallback={self.addPlaceCallback} />;
+            addPlaceElement =
+                <AddPlaceForm
+                    activeComponent={self.state.activeComponent}
+                    addPlaceCallback={self.addPlaceCallback} />;
+        }
+
+        var commentElement = null;
+        if( this.state.activeComponent === "comments" ){
+            commentElement = 
+                <Modal                    
+                    handleClose={this.handleCommentModalClose}
+                    size="large"
+                    visible={true} >
+
+                    <h2>{this.state.placeTitle}</h2>
+
+                    <Comments
+                        activeComponent={this.state.activeComponent}
+                        endpoint={config.commentEndpoint}
+                        placeId={this.state.placeId}
+                        placeTitle={this.state.placeTitle}
+                        userId={this.state.userId} />
+                </Modal>
         }
 
         return(
@@ -102,22 +117,8 @@ this.setState({
                     endpoint={config.userEndpoint}
                     loginCallback={this.loginCallback}
                     logoutCallback={this.logoutCallback} />
-                { addPlaceElement }
-
-<div className="row">
-    <div className="small-12 columns">
-
-
-                <Comments
-                    activeComponent={this.state.activeComponent}
-                    endpoint={config.commentEndpoint}
-                    placeId={this.state.placeId}
-                    placeTitle={this.state.placeTitle}
-                    userId={this.state.userId} />
-
-
-    </div>
-</div>
+                {addPlaceElement}
+                {commentElement}
             </div>
         );
     }

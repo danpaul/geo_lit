@@ -5,6 +5,8 @@
 
 *******************************************************************************/
 
+var Modal = require('./lib/user/lib/modal.jsx');
+
 var MAP_ID = 'map-canvas'
 
 var geoLit = require('./lib/geo_lit');
@@ -42,23 +44,12 @@ var Main = React.createClass({displayName: "Main",
     componentDidMount: function(){
         var self = this;
         $(document).on('geo-lit-place-click', function(event, args){
-// console.log(args)
             self.setState({
                 activeComponent: 'comments',
                 placeId: args._id,
                 placeTitle: args.title,
             })
         });
-
-
-this.setState({
-    activeComponent: 'comments',
-    placeId: '5556b2cab32d7ae70ec8a914',
-    placeTitle: 'TEST TITLE',
-});
-// asdf
-// {_id: "5556b2cab32d7ae70ec8a914", title: "TEST TITLE"}
-
     },
 
     getInitialState: function(){
@@ -69,6 +60,10 @@ this.setState({
             user: null,
             isLoggedIn: false
         };
+    },
+
+    handleCommentModalClose: function(){
+        this.setState({activeComponent: null});
     },
 
     loginCallback: function(user){
@@ -92,9 +87,29 @@ this.setState({
 
         var addPlaceElement = null;
         if( self.state.isLoggedIn ){
-            addPlaceElement = React.createElement(AddPlaceForm, {
-                                activeComponent: self.state.activeComponent, 
-                                addPlaceCallback: self.addPlaceCallback});
+            addPlaceElement =
+                React.createElement(AddPlaceForm, {
+                    activeComponent: self.state.activeComponent, 
+                    addPlaceCallback: self.addPlaceCallback});
+        }
+
+        var commentElement = null;
+        if( this.state.activeComponent === "comments" ){
+            commentElement = 
+                React.createElement(Modal, {
+                    handleClose: this.handleCommentModalClose, 
+                    size: "large", 
+                    visible: true}, 
+
+                    React.createElement("h2", null, this.state.placeTitle), 
+
+                    React.createElement(Comments, {
+                        activeComponent: this.state.activeComponent, 
+                        endpoint: config.commentEndpoint, 
+                        placeId: this.state.placeId, 
+                        placeTitle: this.state.placeTitle, 
+                        userId: this.state.userId})
+                )
         }
 
         return(
@@ -103,22 +118,8 @@ this.setState({
                     endpoint: config.userEndpoint, 
                     loginCallback: this.loginCallback, 
                     logoutCallback: this.logoutCallback}), 
-                 addPlaceElement, 
-
-React.createElement("div", {className: "row"}, 
-    React.createElement("div", {className: "small-12 columns"}, 
-
-
-                React.createElement(Comments, {
-                    activeComponent: this.state.activeComponent, 
-                    endpoint: config.commentEndpoint, 
-                    placeId: this.state.placeId, 
-                    placeTitle: this.state.placeTitle, 
-                    userId: this.state.userId})
-
-
-    )
-)
+                addPlaceElement, 
+                commentElement
             )
         );
     }
@@ -126,7 +127,7 @@ React.createElement("div", {className: "row"},
 
 React.render(React.createElement(Main, null), document.getElementById('content'));
 
-},{"../config":14,"./components/addPlaceForm.jsx":2,"./components/comments.jsx":3,"./lib/geo_lit":4,"./lib/user/index.jsx":7}],2:[function(require,module,exports){
+},{"../config":14,"./components/addPlaceForm.jsx":2,"./components/comments.jsx":3,"./lib/geo_lit":4,"./lib/user/index.jsx":7,"./lib/user/lib/modal.jsx":11}],2:[function(require,module,exports){
 var services = require('../lib/services.js');
 var geoLit = require('../lib/geo_lit.js');
 
@@ -281,7 +282,6 @@ module.exports = React.createClass({displayName: "exports",
         });
     },
 
-// asdf
     handleFlag: function(commentId){
 
         var self = this;
@@ -291,7 +291,6 @@ module.exports = React.createClass({displayName: "exports",
             type: "POST",
             'url': url,
             success: function(response){
-console.log(response);
                 if( response.status !== 'success' ){
                     self.triggerNotice(response.errorMessage);
                 } else {
@@ -340,6 +339,10 @@ console.log(response);
         })
     },
 
+    componentDidMount: function(){
+        this.loadComments(this.props.placeId);
+    },
+
     componentWillReceiveProps: function(nextProps){
         if( nextProps.placeId !== this.props.placeId ){
             this.loadComments(nextProps.placeId);
@@ -380,6 +383,7 @@ console.log(response);
             success: function(response){
                 if( response.status !== 'success' ){
                     console.log(response);
+                    self.triggerNotice(response.errorMessage);
                 } else {
                     self.cleanComments(response.data);
                     self.setState(
@@ -389,6 +393,7 @@ console.log(response);
             },
             error: function(err){
                 console.log(err);
+                self.triggerNotice(SERVER_ERROR_MESSAGE);
             },
             dataType: 'JSON'
         });
@@ -398,7 +403,7 @@ console.log(response);
 
         var addPlaceButtonClasses = 'js-add-place button expand';
 
-        if(this.props.activeComponent !== 'comments' || !this.state.hasLoaded){
+        if(!this.state.hasLoaded){
             return(null);
         } else {
             return(
@@ -601,37 +606,6 @@ var Comment = React.createClass({displayName: "Comment",
     },
     updateComment: function(event){
         this.setState({comment: event.target.value});
-    }
-});
-
-var FadeAlert = React.createClass({displayName: "FadeAlert",
-    alertStyle: {
-        position: 'absolute',
-        top: '20px',
-        right: '20px',
-        background: 'rgba(255, 0, 0, 0.2',
-        display: 'block',
-        color: '#FFFFFF'
-    },
-
-    fadeOutTime: 2000,
-
-    triggerFadeOut: function(){
-
-        $('#sql-comment-alert-box').fadeOut(this.fadeOutTime);
-    },
-
-    render: function(){
-        if( this.props.message === '' ){
-            return null;
-        }
-        this.triggerFadeOut();
-        return(
-            React.createElement("div", {id: "sql-comment-alert-box", style: this.alertStyle}, 
-            "asdfasdfasdfasdf", 
-                this.props.message
-            )
-        );
     }
 });
 
@@ -1162,12 +1136,16 @@ module.exports = React.createClass({displayName: "exports",
             zIndex: 100
         }
 
+        var modalHeight = 0.92 * window.innerHeight;
+
         var modalStyle = {
             margin: '0 auto',
             marginTop: '20px',
             backgroundColor: '#FFF',
             padding: '20px',
-            boxShadow: '0 0 25px #444444'
+            boxShadow: '0 0 25px #444444',
+            overflow: 'scroll',
+maxHeight: modalHeight
         }
 
         var closeButtonContainerStyle = {

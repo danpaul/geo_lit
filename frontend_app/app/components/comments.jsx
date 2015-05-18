@@ -32,7 +32,6 @@ module.exports = React.createClass({
         });
     },
 
-// asdf
     handleFlag: function(commentId){
 
         var self = this;
@@ -42,7 +41,6 @@ module.exports = React.createClass({
             type: "POST",
             'url': url,
             success: function(response){
-console.log(response);
                 if( response.status !== 'success' ){
                     self.triggerNotice(response.errorMessage);
                 } else {
@@ -91,6 +89,10 @@ console.log(response);
         })
     },
 
+    componentDidMount: function(){
+        this.loadComments(this.props.placeId);
+    },
+
     componentWillReceiveProps: function(nextProps){
         if( nextProps.placeId !== this.props.placeId ){
             this.loadComments(nextProps.placeId);
@@ -131,6 +133,7 @@ console.log(response);
             success: function(response){
                 if( response.status !== 'success' ){
                     console.log(response);
+                    self.triggerNotice(response.errorMessage);
                 } else {
                     self.cleanComments(response.data);
                     self.setState(
@@ -140,6 +143,7 @@ console.log(response);
             },
             error: function(err){
                 console.log(err);
+                self.triggerNotice(SERVER_ERROR_MESSAGE);
             },
             dataType: 'JSON'
         });
@@ -149,7 +153,7 @@ console.log(response);
 
         var addPlaceButtonClasses = 'js-add-place button expand';
 
-        if(this.props.activeComponent !== 'comments' || !this.state.hasLoaded){
+        if(!this.state.hasLoaded){
             return(null);
         } else {
             return(
@@ -352,36 +356,5 @@ var Comment = React.createClass({
     },
     updateComment: function(event){
         this.setState({comment: event.target.value});
-    }
-});
-
-var FadeAlert = React.createClass({
-    alertStyle: {
-        position: 'absolute',
-        top: '20px',
-        right: '20px',
-        background: 'rgba(255, 0, 0, 0.2',
-        display: 'block',
-        color: '#FFFFFF'
-    },
-
-    fadeOutTime: 2000,
-
-    triggerFadeOut: function(){
-
-        $('#sql-comment-alert-box').fadeOut(this.fadeOutTime);
-    },
-
-    render: function(){
-        if( this.props.message === '' ){
-            return null;
-        }
-        this.triggerFadeOut();
-        return(
-            <div id="sql-comment-alert-box" style={this.alertStyle}>
-            asdfasdfasdfasdf
-                {this.props.message}
-            </div>
-        );
     }
 });

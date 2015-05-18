@@ -16,12 +16,16 @@ module.exports = React.createClass({
             zIndex: 100
         }
 
+        var modalHeight = 0.92 * window.innerHeight;
+
         var modalStyle = {
             margin: '0 auto',
             marginTop: '20px',
             backgroundColor: '#FFF',
             padding: '20px',
-            boxShadow: '0 0 25px #444444'
+            boxShadow: '0 0 25px #444444',
+            overflow: 'scroll',
+maxHeight: modalHeight
         }
 
         var closeButtonContainerStyle = {
