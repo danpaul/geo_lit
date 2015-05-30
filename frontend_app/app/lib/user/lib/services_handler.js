@@ -9,12 +9,13 @@ module.exports = {
             url: endpoint
         }, callback);
     },
-    register: function(endpoint, email, password, callback){
+    register: function(endpoint, email, username, password, callback){
         makeRequest({
             method: 'POST',
             url: endpoint + '/register',
             data: {
                 email: email,
+                username: username,
                 password: password
             }            
         }, callback);

@@ -5,9 +5,11 @@ var servicesHandler = require('./services_handler.js')
 module.exports = React.createClass({
 
     passwordMinLength: 8,
+    usernameMinLength: 3,
     errorEmail: 'Email address is not valid.',
     errorPasswordsDontMatch: 'The passwords do not match.',
     errorPasswordLength: 'The password must be at least 8 characters.',
+    errorUsernameLength: 'The username can only contain letters, numbers, underscores, dots and dashes and must be at least 3 characters.',
 
     getInitialState: function(){
         return({errorMessage: ''});
@@ -17,25 +19,30 @@ module.exports = React.createClass({
         event.preventDefault()
         var self = this;
 
-        var email = this.refs.email.getInputValue()
-        var passwordOne = this.refs.password.getInputValue()
-        var passwordTwo = this.refs.confirmPassword.getInputValue()
+        var email = this.refs.email.getInputValue();
+        var username = this.refs.username.getInputValue();
+        var passwordOne = this.refs.password.getInputValue();
+        var passwordTwo = this.refs.confirmPassword.getInputValue();
 
-        var validationResult = this.validate(email, passwordOne, passwordTwo)
+        var validationResult = this.validate(email, username, passwordOne, passwordTwo)
         if( validationResult !== true ){
             this.setState({errorMessage: validationResult})
             return;
         }
 
+        console.log('Registering ' + email);
         servicesHandler.register(this.props.endpoint,
                                  email,
+                                 username,
                                  passwordOne,
                                  function(err, response){
             if( err ){
+                console.log(err);
                 self.setState({errorMessage: err});
                 return;
             }
 
+            console.log(response);
             self.setState({errorMessage: ''});
 
             if( self.props.loginCallback ){
@@ -53,6 +60,11 @@ module.exports = React.createClass({
                         type="text"
                         label="Email"
                         ref="email"/>
+                    <FormInput
+                        name="username"
+                        type="text"
+                        label="Username"
+                        ref="username"/>
                     <FormInput
                         name="password"
                         type="password"
@@ -76,19 +88,29 @@ module.exports = React.createClass({
             </div>
         )
     },
-    validate: function(email, passwordOne, passwordTwo){
+    validate: function(email, username, passwordOne, passwordTwo){
         if( !validateEmail(email) ){
             return this.errorEmail;
+        }
+        if( !validateUsername(username, this.usernameMinLength)){
+            return this.errorUsernameLength;
         }
         if( passwordOne !== passwordTwo ){
             return this.errorPasswordsDontMatch;
         }
         if( passwordOne.length < this.passwordMinLength ){
-            return this.errorPasswordLength
+            return this.errorPasswordLength;
         }
         return true;
     }
 })
+
+function validateUsername(username, minLength){
+    if( username.length < minLength ){
+        return false;
+    }
+    return(/^([a-zA-Z0-9]|\-|\_|\.)+$/.test(username));
+}
 
 // http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
 function validateEmail(email) {

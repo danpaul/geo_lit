@@ -25,7 +25,7 @@ module.exports = React.createClass({
             padding: '20px',
             boxShadow: '0 0 25px #444444',
             overflow: 'scroll',
-maxHeight: modalHeight
+            maxHeight: modalHeight
         }
 
         var closeButtonContainerStyle = {

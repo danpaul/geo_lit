@@ -127,7 +127,7 @@ var Main = React.createClass({displayName: "Main",
 
 React.render(React.createElement(Main, null), document.getElementById('content'));
 
-},{"../config":14,"./components/addPlaceForm.jsx":2,"./components/comments.jsx":3,"./lib/geo_lit":4,"./lib/user/index.jsx":7,"./lib/user/lib/modal.jsx":11}],2:[function(require,module,exports){
+},{"../config":13,"./components/addPlaceForm.jsx":2,"./components/comments.jsx":3,"./lib/geo_lit":4,"./lib/user/index.jsx":6,"./lib/user/lib/modal.jsx":10}],2:[function(require,module,exports){
 var services = require('../lib/services.js');
 var geoLit = require('../lib/geo_lit.js');
 
@@ -247,7 +247,7 @@ module.exports = React.createClass({displayName: "exports",
 
 });
 
-},{"../lib/geo_lit.js":4,"../lib/services.js":5,"../lib/user/lib/alert.jsx":8,"../lib/user/lib/modal.jsx":11}],3:[function(require,module,exports){
+},{"../lib/geo_lit.js":4,"../lib/services.js":5,"../lib/user/lib/alert.jsx":7,"../lib/user/lib/modal.jsx":10}],3:[function(require,module,exports){
 var _ = require('underscore');
 
 var SERVER_ERROR_MESSAGE = 'A server error occurred.';
@@ -609,11 +609,10 @@ var Comment = React.createClass({displayName: "Comment",
     }
 });
 
-},{"underscore":15}],4:[function(require,module,exports){
+},{"underscore":14}],4:[function(require,module,exports){
 var geoLit = {};
 
 var _ = require('underscore');
-var user = require('./user');
 var services = require('./services')
 
 /*******************************************************************************
@@ -807,7 +806,7 @@ geoLit.addPlace = function(title, callback){
 
 module.exports = geoLit
 
-},{"./services":5,"./user":6,"underscore":15}],5:[function(require,module,exports){
+},{"./services":5,"underscore":14}],5:[function(require,module,exports){
 var services = {}
 var config = require('../../config.js')
 
@@ -854,27 +853,7 @@ services.findNear = function(positionData, callbackIn){
 
 module.exports = services;
 
-},{"../../config.js":14}],6:[function(require,module,exports){
-// var user = {};
-
-// user.data = {};
-
-// // user.isLoggedIn = false;
-// user.isLoggedIn = true;
-// user.id = 777;
-
-// // // stubbed in for testing
-// // user.isLoggedIn = function(callback){
-// //     callback(null, true;)
-// // }
-
-// // user.getId = function(){
-// //     callback(null, 777);
-// // }
-
-// module.exports = user;
-
-},{}],7:[function(require,module,exports){
+},{"../../config.js":13}],6:[function(require,module,exports){
 var FormInput = require('./lib/input.jsx');
 var LoginForm = require('./lib/login_form.jsx');
 var RegisterForm = require('./lib/register_form.jsx');
@@ -1007,7 +986,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 });
 
-},{"./lib/input.jsx":9,"./lib/login_form.jsx":10,"./lib/modal.jsx":11,"./lib/register_form.jsx":12,"./lib/services_handler.js":13}],8:[function(require,module,exports){
+},{"./lib/input.jsx":8,"./lib/login_form.jsx":9,"./lib/modal.jsx":10,"./lib/register_form.jsx":11,"./lib/services_handler.js":12}],7:[function(require,module,exports){
 /**
 * Takes property `message`, will display message if not empty
 * Optionally takes styles (object)
@@ -1029,7 +1008,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 });
 
-},{}],9:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = React.createClass({displayName: "exports",
 
     getInitialState: function(){
@@ -1057,7 +1036,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 })
 
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var FormInput = require('./input.jsx');
 var Alert = require('./alert.jsx');
 var servicesHandler = require('./services_handler.js');
@@ -1117,7 +1096,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 })
 
-},{"./alert.jsx":8,"./input.jsx":9,"./services_handler.js":13}],11:[function(require,module,exports){
+},{"./alert.jsx":7,"./input.jsx":8,"./services_handler.js":12}],10:[function(require,module,exports){
 /**
 * should pass properites:
 *   visible: true/false
@@ -1145,7 +1124,7 @@ module.exports = React.createClass({displayName: "exports",
             padding: '20px',
             boxShadow: '0 0 25px #444444',
             overflow: 'scroll',
-maxHeight: modalHeight
+            maxHeight: modalHeight
         }
 
         var closeButtonContainerStyle = {
@@ -1196,7 +1175,7 @@ maxHeight: modalHeight
     }
 });
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var Alert = require('./alert.jsx');
 var FormInput = require('./input.jsx');
 var servicesHandler = require('./services_handler.js')
@@ -1204,9 +1183,11 @@ var servicesHandler = require('./services_handler.js')
 module.exports = React.createClass({displayName: "exports",
 
     passwordMinLength: 8,
+    usernameMinLength: 3,
     errorEmail: 'Email address is not valid.',
     errorPasswordsDontMatch: 'The passwords do not match.',
     errorPasswordLength: 'The password must be at least 8 characters.',
+    errorUsernameLength: 'The username can only contain letters, numbers, underscores, dots and dashes and must be at least 3 characters.',
 
     getInitialState: function(){
         return({errorMessage: ''});
@@ -1216,25 +1197,30 @@ module.exports = React.createClass({displayName: "exports",
         event.preventDefault()
         var self = this;
 
-        var email = this.refs.email.getInputValue()
-        var passwordOne = this.refs.password.getInputValue()
-        var passwordTwo = this.refs.confirmPassword.getInputValue()
+        var email = this.refs.email.getInputValue();
+        var username = this.refs.username.getInputValue();
+        var passwordOne = this.refs.password.getInputValue();
+        var passwordTwo = this.refs.confirmPassword.getInputValue();
 
-        var validationResult = this.validate(email, passwordOne, passwordTwo)
+        var validationResult = this.validate(email, username, passwordOne, passwordTwo)
         if( validationResult !== true ){
             this.setState({errorMessage: validationResult})
             return;
         }
 
+        console.log('Registering ' + email);
         servicesHandler.register(this.props.endpoint,
                                  email,
+                                 username,
                                  passwordOne,
                                  function(err, response){
             if( err ){
+                console.log(err);
                 self.setState({errorMessage: err});
                 return;
             }
 
+            console.log(response);
             self.setState({errorMessage: ''});
 
             if( self.props.loginCallback ){
@@ -1252,6 +1238,11 @@ module.exports = React.createClass({displayName: "exports",
                         type: "text", 
                         label: "Email", 
                         ref: "email"}), 
+                    React.createElement(FormInput, {
+                        name: "username", 
+                        type: "text", 
+                        label: "Username", 
+                        ref: "username"}), 
                     React.createElement(FormInput, {
                         name: "password", 
                         type: "password", 
@@ -1275,19 +1266,29 @@ module.exports = React.createClass({displayName: "exports",
             )
         )
     },
-    validate: function(email, passwordOne, passwordTwo){
+    validate: function(email, username, passwordOne, passwordTwo){
         if( !validateEmail(email) ){
             return this.errorEmail;
+        }
+        if( !validateUsername(username, this.usernameMinLength)){
+            return this.errorUsernameLength;
         }
         if( passwordOne !== passwordTwo ){
             return this.errorPasswordsDontMatch;
         }
         if( passwordOne.length < this.passwordMinLength ){
-            return this.errorPasswordLength
+            return this.errorPasswordLength;
         }
         return true;
     }
 })
+
+function validateUsername(username, minLength){
+    if( username.length < minLength ){
+        return false;
+    }
+    return(/^([a-zA-Z0-9]|\-|\_|\.)+$/.test(username));
+}
 
 // http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
 function validateEmail(email) {
@@ -1295,7 +1296,7 @@ function validateEmail(email) {
     return re.test(email);
 }
 
-},{"./alert.jsx":8,"./input.jsx":9,"./services_handler.js":13}],13:[function(require,module,exports){
+},{"./alert.jsx":7,"./input.jsx":8,"./services_handler.js":12}],12:[function(require,module,exports){
 var STATUS_SUCCESS = 'success',
     STATUS_FAILURE = 'failure',
     STATUS_ERROR = 'error';
@@ -1307,12 +1308,13 @@ module.exports = {
             url: endpoint
         }, callback);
     },
-    register: function(endpoint, email, password, callback){
+    register: function(endpoint, email, username, password, callback){
         makeRequest({
             method: 'POST',
             url: endpoint + '/register',
             data: {
                 email: email,
+                username: username,
                 password: password
             }            
         }, callback);
@@ -1354,7 +1356,7 @@ var makeRequest = function(requestData, callback){
     $.ajax(requestData);
 }
 
-},{}],14:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var config = {};
 
 if( window.location.href.toLowerCase().indexOf('localhost') !==  -1 ){
@@ -1376,7 +1378,7 @@ config.userEndpoint = config.geoLitEndpoint + '/user';
 
 module.exports = config;
 
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors

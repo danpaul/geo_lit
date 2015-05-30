@@ -1,7 +1,6 @@
 var geoLit = {};
 
 var _ = require('underscore');
-var user = require('./user');
 var services = require('./services')
 
 /*******************************************************************************
