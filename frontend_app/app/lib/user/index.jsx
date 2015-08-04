@@ -3,25 +3,29 @@ var LoginForm = require('./lib/login_form.jsx');
 var RegisterForm = require('./lib/register_form.jsx');
 var Modal = require('./lib/modal.jsx');
 
+var services = require('./lib/services_handler.js');
+
 var LOGIN_BUTTON_STYLE = {
     position: 'absolute',
     top: '5px',
-    left: '5px'
+    right: '5px'
 }
 
 /**
 * Require the following props:
-*   endpoint[sql_login endpoint],
-*   loginCallback[function called afer login, passed user object]
-*   logoutCallback[function called afer logout]
+*   endpoint (sql_login endpoint),
+*   loginCallback (function called afer login, passed user object)
+*   logoutCallback (function called afer logout)
 */
 module.exports = React.createClass({
     getInitialState: function(){
+        this.loadUser();
         return({
             activeForm: 'login',
             isLoggedIn: false,
             user: null,
-            userFormIsVisible: false
+            userFormIsVisible: false,
+            hasLoaded: false
         });
     },
     handleClose: function(event){
@@ -35,16 +39,47 @@ module.exports = React.createClass({
         this.setState({activeForm: 'register'})
     },
     handleLoginButtonClick: function(event){
-        this.setState({userFormIsVisible: true})
+        var self = this;
+        if( !self.state.isLoggedIn ){
+            self.setState({userFormIsVisible: true});
+            return;
+        }
+        services.logout(self.props.endpoint, function(err){
+            if( err ){
+                alert(err);
+                return;
+            }
+            self.setState({isLoggedIn: false}, function(){
+                if( self.props.logoutCallback ){
+                    self.props.logoutCallback();
+                }
+            })
+        });
+    },
+    loadUser: function(){
+        var self = this;
+        services.getUser(self.props.endpoint, function(err, user){
+            if( err ){
+                console.log(err);
+                self.setState({hasLoaded: true})
+                return;
+            }
+            self.setState({isLoggedIn: true, user: user, hasLoaded: true},
+                          function(){
+                if( self.props.loginCallback ){ self.props.loginCallback(user); }
+            });
+        });
     },
     loginCallback: function(user){
-        this.setState({isLoggedIn: true, user: user})
-        if( this.props.loginCallback ){
-            this.props.loginCallback(user);
-        }
+        var self = this;
+        self.setState({isLoggedIn: true, user: user, userFormIsVisible: false},
+                      function(){
+            if( self.props.loginCallback ){ self.props.loginCallback(user); }
+        });
     },
     render: function(){
-        var self = this
+        var self = this;
+        if( !self.state.hasLoaded ){ return null; }
 
         var formVisible = {}
         var forms = ['login', 'register']
@@ -58,7 +93,7 @@ module.exports = React.createClass({
                     className={"sql-login-button button tiny"}
                     style={LOGIN_BUTTON_STYLE}
                     onClick={this.handleLoginButtonClick} >
-                    Login
+                    {this.state.isLoggedIn ? 'Logout' : 'Login' }
                 </button>
 
                 <Modal

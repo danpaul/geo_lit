@@ -2,7 +2,7 @@
 @import "vendor/foundation";
 
 #map-canvas {
-    height: 200px;
+    height: 100%;
     margin-bottom: 20px;
 }
 
@@ -32,15 +32,6 @@ button.inverted:hover, button.inverted:focus{
     margin-left: 5px;
 }
 
-// button.inv {
-//     background-color: rgba(0, 0, 0, 0.31);
-//     border-radius: 2px;
-//     border-color: rgba(255, 255, 255, 0.31);
-//     border-width: 1px;
-// }
-
-
-
 a{
     color: red;
 }
@@ -59,8 +50,12 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 .sql-comment-comment-meta{
     font-size: 12px;
     font-weight: bold;
+<<<<<<< HEAD
 }
 
 // .sql-comment-container:nth-child(odd){
 //     background-color: red;
 // }
+=======
+}
+>>>>>>> cc51bb63929b12dd6868a69f7d8184850f452b2e

@@ -5,6 +5,8 @@
 
 *******************************************************************************/
 
+var Modal = require('./lib/user/lib/modal.jsx');
+
 var MAP_ID = 'map-canvas'
 
 var geoLit = require('./lib/geo_lit');
@@ -29,10 +31,18 @@ var UserForm = require('./lib/user/index.jsx');
 
 var Main = React.createClass({displayName: "Main",
 
-    componentDidMount: function(){
-
+    // called on success when new place is added
+    addPlaceCallback: function(place){
         var self = this;
+        self.setState({
+            activeComponent: 'comments',
+            placeId: place._id,
+            placeTitle: place.title
+        });
+    },
 
+    componentDidMount: function(){
+        var self = this;
         $(document).on('geo-lit-place-click', function(event, args){
             self.setState({
                 activeComponent: 'comments',
@@ -46,22 +56,20 @@ var Main = React.createClass({displayName: "Main",
         return {
             activeComponent: 'addPlaceForm',
             placeId: null,
-
-
-
-// TODO: UPDATE THIS!!!
-
-
-
-            userId: 1,
+            userId: null,
             user: null,
             isLoggedIn: false
         };
     },
 
+    handleCommentModalClose: function(){
+        this.setState({activeComponent: null});
+    },
+
     loginCallback: function(user){
         this.setState({
             user: user,
+            userId: user.id,
             isLoggedIn: true
         })
     },
@@ -69,44 +77,49 @@ var Main = React.createClass({displayName: "Main",
     logoutCallback: function(){
         this.setState({
             user: null,
+            userId: null,
             isLoggedIn: false
         })
     },
 
-    componentDidMount: function(){
-
-// asdf TODO: REMOVE THIS!!!
-this.setState({
-    activeComponent: 'comments',
-    placeId: '554d73c2cae7eb0a05f467c8',
-    placeTitle: 'test',
-});
-
-    },
-
     render: function(){
+        var self = this;
+
+        var addPlaceElement = null;
+        if( self.state.isLoggedIn ){
+            addPlaceElement =
+                React.createElement(AddPlaceForm, {
+                    activeComponent: self.state.activeComponent, 
+                    addPlaceCallback: self.addPlaceCallback});
+        }
+
+        var commentElement = null;
+        if( this.state.activeComponent === "comments" ){
+            commentElement = 
+                React.createElement(Modal, {
+                    handleClose: this.handleCommentModalClose, 
+                    size: "large", 
+                    visible: true}, 
+
+                    React.createElement("h2", null, this.state.placeTitle), 
+
+                    React.createElement(Comments, {
+                        activeComponent: this.state.activeComponent, 
+                        endpoint: config.commentEndpoint, 
+                        placeId: this.state.placeId, 
+                        placeTitle: this.state.placeTitle, 
+                        userId: this.state.userId})
+                )
+        }
+
         return(
             React.createElement("div", null, 
                 React.createElement(UserForm, {
                     endpoint: config.userEndpoint, 
                     loginCallback: this.loginCallback, 
                     logoutCallback: this.logoutCallback}), 
-                React.createElement(AddPlaceForm, {
-                    activeComponent: this.state.activeComponent}), 
-React.createElement("div", {className: "row"}, 
-    React.createElement("div", {className: "small-12 columns"}, 
-
-
-                React.createElement(Comments, {
-                    activeComponent: this.state.activeComponent, 
-                    endpoint: config.commentEndpoint, 
-                    placeId: this.state.placeId, 
-                    placeTitle: this.state.placeTitle, 
-                    userId: this.state.userId})
-
-
-    )
-)
+                addPlaceElement, 
+                commentElement
             )
         );
     }
@@ -114,47 +127,113 @@ React.createElement("div", {className: "row"},
 
 React.render(React.createElement(Main, null), document.getElementById('content'));
 
-},{"../config":13,"./components/addPlaceForm.jsx":2,"./components/comments.jsx":3,"./lib/geo_lit":4,"./lib/user/index.jsx":7}],2:[function(require,module,exports){
+},{"../config":13,"./components/addPlaceForm.jsx":2,"./components/comments.jsx":3,"./lib/geo_lit":4,"./lib/user/index.jsx":6,"./lib/user/lib/modal.jsx":10}],2:[function(require,module,exports){
 var services = require('../lib/services.js');
 var geoLit = require('../lib/geo_lit.js');
 
+var Modal = require('../lib/user/lib/modal.jsx');
+var Alert = require('../lib/user/lib/alert.jsx');
+
+var ERROR_TITLE_TOO_SHORT = 'Place title is not long enough.';
+
+var BUTTON_STYLE = {
+    position: 'absolute',
+    top: '5px',
+    left: '5px'
+}
+
 module.exports = React.createClass({displayName: "exports",
+
+    validation: {
+        minPlaceLength: 4
+    },
 
     addPlace: function(event){
         var self = this;
         event.preventDefault();
-        geoLit.addPlace(this.state.placeValue, function(errorMessage){
+
+        var placeTitle = this.state.placeValue;
+        var placeTitleValidation = this.validatePlace(placeTitle);
+
+        if( placeTitleValidation !== true ){
+            self.setState({errorMessage: placeTitleValidation});
+            return;
+        }
+
+        geoLit.addPlace(this.state.placeValue, function(errorMessage, place){
             if( errorMessage ){
                 self.setState({'errorMessage': errorMessage});
             } else {
-                console.log(self.state.placeValue + ' added.');
+                if( self.props.addPlaceCallback ){
+                    self.setState({
+                            errorMessage: '',
+                            placeValue: '',
+                            modalVisible: false}, function(){
+
+                        if( self.props.addPlaceCallback ){
+                            self.props.addPlaceCallback(place);
+                        }
+                    });
+                }
             }
         })
     },
 
     getInitialState: function(){
-        return({ placeValue: '', errorMessage: ''});
+        return({ placeValue: '', errorMessage: '', modalVisible: false});
+    },
+
+    handleModalClose: function(){
+        this.setState({modalVisible: false});
+    },
+
+    handleShowFormClick: function(e){
+        this.setState({modalVisible: true});
+    },
+
+    // returns true if valid, else string error message
+    validatePlace: function(placeTitle){
+        if( placeTitle.trim().length < this.validation.minPlaceLength ){
+            return ERROR_TITLE_TOO_SHORT;
+        }
+        return true;
     },
 
     render: function(){
+        var self = this;
         var addPlaceButtonClasses = 'js-add-place button expand';
+
+        if( self.props.activeComponent !== '' )
 
         return(
             React.createElement("div", null, 
-                React.createElement("div", null, this.state.errorMessage), 
-                React.createElement("form", null, 
-                    React.createElement("div", {className: "row"}, 
-                        React.createElement("div", {className: "small-12 columns"}, 
-                            React.createElement("input", {
-                                type: "text", 
-                                name: "title", 
-                                placeholder: "Title", 
-                                value: this.state.placeValue, 
-                                onChange: this.updatePlaceValue}), 
-                            React.createElement("a", {
-                                href: "javascript:void(0)", 
-                                onClick: this.addPlace, 
-                                className: addPlaceButtonClasses}, "Add Place")
+                React.createElement("button", {
+                    className: "sql-login-button button tiny", 
+                    style: BUTTON_STYLE, 
+                    onClick: this.handleShowFormClick}, 
+                    "Add Place"
+                ), 
+                React.createElement(Modal, {
+                    visible: this.state.modalVisible, 
+                    handleClose: this.handleModalClose}, 
+                    React.createElement(Alert, {message: this.state.errorMessage}), 
+                    React.createElement("form", null, 
+                        React.createElement("div", {className: "row"}, 
+                            React.createElement("div", {className: "small-12 columns"}, 
+                                React.createElement("input", {
+                                    type: "text", 
+                                    name: "title", 
+                                    placeholder: "Title", 
+                                    value: this.state.placeValue, 
+                                    onChange: this.updatePlaceValue}), 
+                                React.createElement("a", {
+                                    href: "javascript:void(0)", 
+                                    onClick: this.addPlace, 
+                                    className: addPlaceButtonClasses
+                                }, 
+                                    "Add Place"
+                                )
+                            )
                         )
                     )
                 )
@@ -168,10 +247,10 @@ module.exports = React.createClass({displayName: "exports",
 
 });
 
-},{"../lib/geo_lit.js":4,"../lib/services.js":5}],3:[function(require,module,exports){
+},{"../lib/geo_lit.js":4,"../lib/services.js":5,"../lib/user/lib/alert.jsx":7,"../lib/user/lib/modal.jsx":10}],3:[function(require,module,exports){
 var _ = require('underscore');
-var services = require('../lib/services.js');
-var geoLit = require('../lib/geo_lit.js');
+
+var SERVER_ERROR_MESSAGE = 'A server error occurred.';
 
 module.exports = React.createClass({displayName: "exports",
 
@@ -185,12 +264,11 @@ module.exports = React.createClass({displayName: "exports",
             type: "POST",
             'url': url,
             data: {
-                'comment': comment,
-                'userId': this.props.userId
+                'comment': comment
             },
             success: function(response){
                 if( response.status !== 'success' ){
-                    console.log(response);
+                    self.triggerNotice(response.errorMessage);
                 } else {
                     self.setState({hasLoaded: false});
                     self.loadComments(self.props.placeId);
@@ -198,19 +276,71 @@ module.exports = React.createClass({displayName: "exports",
             },
             error: function(err){
                 console.log(err);
+                self.triggerNotice(SERVER_ERROR_MESSAGE);
             },
             dataType: 'JSON'
         });
     },
 
+    handleFlag: function(commentId){
+
+        var self = this;
+        var url = self.props.endpoint + '/flag/' + commentId;
+
+        $.ajax({
+            type: "POST",
+            'url': url,
+            success: function(response){
+                if( response.status !== 'success' ){
+                    self.triggerNotice(response.errorMessage);
+                } else {
+                    self.triggerNotice('Comment Flagged');
+                }
+            },
+            error: function(err){
+                self.triggerNotice(SERVER_ERROR_MESSAGE);
+            },
+            dataType: 'JSON'
+        });
+
+    },
+    handleVote: function(direction, commentId){
+
+        var self = this;
+        var url = self.props.endpoint + '/comment/vote/' + direction +
+                        '/' + commentId;
+
+        $.ajax({
+            type: "POST",
+            'url': url,
+            success: function(response){
+                if( response.status !== 'success' ){
+                    self.triggerNotice(response.errorMessage);
+                } else {
+                    self.triggerNotice('Vote Added');
+                }
+            },
+            error: function(err){
+                self.triggerNotice(SERVER_ERROR_MESSAGE);
+            },
+            dataType: 'JSON'
+        });
+
+    },
     cleanComments: function(comments){
         var self = this;
         _.each(comments, function(comment){
             comment.addComment = self.addComment;
+            comment.handleVote = self.handleVote;
+            comment.handleFlag = self.handleFlag;
             if( comment.children.length !== 0 ){
                 self.cleanComments(comment.children);
             }
         })
+    },
+
+    componentDidMount: function(){
+        this.loadComments(this.props.placeId);
     },
 
     componentWillReceiveProps: function(nextProps){
@@ -221,7 +351,27 @@ module.exports = React.createClass({displayName: "exports",
     },
 
     getInitialState: function(){
-        return({ hasLoaded: false, comments: [] });
+        return({ hasLoaded: false, comments: [] , notice: null});
+    },
+
+    triggerNotice: function(message){
+        var self = this;
+        var noticeElement =
+            React.createElement("div", {
+                style: {
+                    position: 'fixed',
+                    top: '10px',
+                    right: '10px'
+                }, 
+                className: "alert-box alert"}, 
+                message
+            );
+
+        self.setState({notice: noticeElement}, function(){
+            setTimeout(function(){
+                self.setState({notice: null});
+            }, 2000)
+        });
     },
 
     loadComments: function(placeId){
@@ -233,6 +383,7 @@ module.exports = React.createClass({displayName: "exports",
             success: function(response){
                 if( response.status !== 'success' ){
                     console.log(response);
+                    self.triggerNotice(response.errorMessage);
                 } else {
                     self.cleanComments(response.data);
                     self.setState(
@@ -242,27 +393,26 @@ module.exports = React.createClass({displayName: "exports",
             },
             error: function(err){
                 console.log(err);
+                self.triggerNotice(SERVER_ERROR_MESSAGE);
             },
             dataType: 'JSON'
         });
     },
     render: function(){
+        var self = this;
 
         var addPlaceButtonClasses = 'js-add-place button expand';
 
-        if(this.props.activeComponent !== 'comments' || !this.state.hasLoaded){
-            return(React.createElement("div", null, " "));
+        if(!this.state.hasLoaded){
+            return(null);
         } else {
             return(
                 React.createElement("div", null, 
-                    React.createElement(Comments, {
-                        comments: [{
-                            parent: 0,
-                            children: [],
-                            comment: '',
-                            addComment: this.addComment
-                        }]}), 
-                    React.createElement("h2", null, " "), 
+                    self.state.notice, 
+                    React.createElement(Comment, {
+                        children: [], 
+                        isTopLevel: true, 
+                        addComment: this.addComment}), 
                     React.createElement(Comments, {comments: this.state.comments})
                 ));
         }
@@ -277,26 +427,26 @@ var Comments = React.createClass({displayName: "Comments",
         var self = this;
 
         var comments = this.props.comments.map(function(comment, index){
+
             var isOpen = false;
             if( comment.comment === null ){ isOpen = true; }
             var commentChildren = '';
-
             if( comment.children.length !== 0 ){
                 commentChildren = React.createElement(Comments, {comments: comment.children});
             }
-
             return(
                 React.createElement(Comment, {
-                    parent: comment.id, 
-                    childrenElement: commentChildren, 
-                    children: comment.children, 
-                    comment: comment.comment, 
                     addComment: comment.addComment, 
-                    // upVotes={comment.up_vote}
-                    // downVotes={comment.down_vote}
+                    children: comment.children, 
+                    childrenElement: commentChildren, 
+                    comment: comment.comment, 
                     created: comment.created, 
-                    rank: comment.rank, 
-                    key: index})
+                    handleVote: comment.handleVote, 
+                    handleFlag: comment.handleFlag, 
+                    id: comment.id, 
+                    isTopLevel: false, 
+                    key: index, 
+                    rank: comment.rank})
             );
         });
 
@@ -310,30 +460,63 @@ var Comments = React.createClass({displayName: "Comments",
 var Comment = React.createClass({displayName: "Comment",
 
     getInitialState: function(){
-        return({comment: '', showCommentForm: false, showChildren: true});
+        return({
+            comment: '',
+            showCommentForm: false,
+            showControls: false,
+            showChildren: true});
     },
     handleCancel: function(){
         this.setState({showCommentForm: false});
     },
+<<<<<<< HEAD
     handleSubmit: function(event){
         event.preventDefault();
         event.stopPropagation();
         this.props.addComment(this.props.parent, this.state.comment);
+=======
+    handleShowControl: function(){
+        this.setState({showControls: !this.state.showControls});
+    },
+    handleSubmit: function(){
+        event.preventDefault();
+        this.props.addComment(this.props.id, this.state.comment);
+>>>>>>> cc51bb63929b12dd6868a69f7d8184850f452b2e
     },
     handleToggleChilren: function(){
         var nextState = !this.state.showChildren;
-        this.setState({showChildren: nextState});
+        this.setState({
+            showChildren: nextState, showControls: false});
     },
     handleToggleCommentForm: function(){
         var nextState = !this.state.showCommentForm;
         this.setState({showCommentForm: nextState});
     },
+
+    handleUpvote: function(){
+        this.props.handleVote('up', this.props.id);
+    },
+
+    handleFlag: function(){
+        this.props.handleFlag(this.props.id);
+    },
+
+    handleDownvote: function(){
+        this.props.handleVote('down', this.props.id);
+    },
+
     render: function(){
 
         var self = this;
 
-        var commentFormStyle = this.state.showCommentForm ?
-                {display: 'block'} : {display: 'none'};
+        var commentFormStyle = this.state.showCommentForm &&
+                               this.state.showControls ?
+                                    {display: 'block', marginTop: '10px'} :
+                                    {display: 'none'};
+
+        if( self.props.isTopLevel ){
+            commentFormStyle = {display: 'block', marginTop: '10px'};
+        }
 
         var toggleCharacter = self.state.showChildren ? '-' : '+';
         var childContainerStyle = self.state.showChildren ?
@@ -343,15 +526,21 @@ var Comment = React.createClass({displayName: "Comment",
         var commentRank = self.props.rank ? self.props.rank : 0;
 
         var createdDate = new Date(self.props.created * 1000).toString();
+<<<<<<< HEAD
+=======
+        var hasChildren = this.props.children.length > 0;
+>>>>>>> cc51bb63929b12dd6868a69f7d8184850f452b2e
 
         return(
-            React.createElement("div", {className: "sql-comment-container"}, 
-                React.createElement("div", {className: "sql-comment-comment-meta"}, 
-                    React.createElement("span", {style: toggleButtonStle}, 
-                        "[", React.createElement("a", {onClick: this.handleToggleChilren}, 
-                            toggleCharacter
-                        ), "]"
-                    ), 
+            React.createElement("div", {
+                className: "sql-comment-container", 
+                style: {marginTop: '10px'}}, 
+
+                React.createElement("div", {
+                    className: "sql-comment-comment-meta", 
+                    style:  self.props.isTopLevel ?
+                        {display: 'none'} : {marginTop: '10px'}
+                }, 
                     React.createElement("span", {className: "sql-comment-username"}, 
                         "danpaul"
                     ), " -",  
@@ -367,12 +556,41 @@ var Comment = React.createClass({displayName: "Comment",
                         commentRank
                     )
                 ), 
-                React.createElement("div", null, this.props.comment), 
-                React.createElement("div", {style: !this.state.showCommentForm ? {display: 'block'} : {display: 'none'}}, 
+                React.createElement("div", {
+                    style: {cursor: 'pointer'}, 
+                    onClick: self.handleShowControl
+                }, 
+                    this.props.comment
+                ), 
+                React.createElement("div", {style:  this.state.showControls ?
+                                {display: 'block'} : {display: 'none'}}
+
+                ), 
+                React.createElement("div", {style:  this.state.showControls ?
+                                {display: 'block'} : {display: 'none'}}, 
+
+                    React.createElement("a", {onClick: this.handleUpvote}, 
+                        "upvote"
+                    ), " - ", 
+                    React.createElement("a", {onClick: this.handleDownvote}, 
+                        "downvote"
+                    ), " - ", 
+                    React.createElement("a", {onClick: this.handleFlag}, 
+                        "flag"
+                    ), " - ", 
                     React.createElement("a", {onClick: this.handleToggleCommentForm}, 
                         "comment"
+                    ), 
+                    React.createElement("span", {style:  hasChildren ?
+                        {display: 'inline'} : {display: 'none'}}, 
+
+                        " - ", 
+                        React.createElement("a", {onClick: this.handleToggleChilren}, 
+                             this.state.showChildren ? 'collapse' : 'reveal'
+                        )
                     )
                 ), 
+
                 React.createElement("div", {style: commentFormStyle}, 
                     React.createElement("textarea", {
                         placeholder: "Add Comment", 
@@ -389,6 +607,7 @@ var Comment = React.createClass({displayName: "Comment",
                         onClick: self.handleCancel
                     }, "Cancel")
                 ), 
+
                 React.createElement("div", {style: childContainerStyle}, 
                     this.props.childrenElement
                 )
@@ -398,13 +617,12 @@ var Comment = React.createClass({displayName: "Comment",
     updateComment: function(event){
         this.setState({comment: event.target.value});
     }
-})
+});
 
-},{"../lib/geo_lit.js":4,"../lib/services.js":5,"underscore":14}],4:[function(require,module,exports){
+},{"underscore":14}],4:[function(require,module,exports){
 var geoLit = {};
 
 var _ = require('underscore');
-var user = require('./user');
 var services = require('./services')
 
 /*******************************************************************************
@@ -440,6 +658,7 @@ geoLit.zoomLevel = 12;
 geoLit.createMap = function(){
     var mapOptions = {
         zoom: geoLit.zoomLevel,
+        disableDefaultUI: true,
         center: new google.maps.LatLng(geoLit.currentLatitude,
                                        geoLit.currentLongitude)
     };
@@ -500,7 +719,7 @@ geoLit.addPlacesToMap = function(places){
         google.maps.event.addListener(geoLit.placeMarkers[place._id],
                                     'click',
                                     function(){
-
+console.log('here')
             $(document).trigger('geo-lit-place-click', [this.geoLit]);
         });
     })
@@ -578,13 +797,6 @@ geoLit.intervalCallback = function(){
 // add place with title to map
 geoLit.addPlace = function(title, callback){
 
-
-
-    if( !user.isLoggedIn ){
-        callback(ERROR_USER_NOT_LOGGED_IN);
-        return;
-    }
-
     geoLit.getPosition(function(err, location){
         if( err ){
             callback('Unable to find location.');
@@ -593,29 +805,18 @@ geoLit.addPlace = function(title, callback){
 
         var placeObject = {};
         placeObject.location = [location.longitude, location.latitude];
-
-// console.log(place);
         placeObject.title = title;
         placeObject.user = user.id;
         services.add(placeObject, function(err, resp){
-// console.log('asdfasdfasdf')
-// console.log(resp);
-// console.log(err);
             if( err ){ callback(err); }
-            else { callback(); }
+            else { callback(null, resp); }
         })
     })
-// console.log(geoLit.getPosition());
-// console.log(callback);
-// return;
-
-
-
 }
 
 module.exports = geoLit
 
-},{"./services":5,"./user":6,"underscore":14}],5:[function(require,module,exports){
+},{"./services":5,"underscore":14}],5:[function(require,module,exports){
 var services = {}
 var config = require('../../config.js')
 
@@ -626,9 +827,9 @@ services.add = function(positionData, callbackIn){
         type: "POST",
         url: config.geoLitEndpoint + '/position',
         data: positionData,
-        success: function(data){
-            if( data.status === 'success' ){
-                callbackIn();
+        success: function(response){
+            if( response.status === 'success' ){
+                callbackIn(null, response.data);
             } else {
                 callbackIn(data.errorMessage);
             }
@@ -662,50 +863,34 @@ services.findNear = function(positionData, callbackIn){
 module.exports = services;
 
 },{"../../config.js":13}],6:[function(require,module,exports){
-var user = {};
-
-user.data = {};
-
-// user.isLoggedIn = false;
-user.isLoggedIn = true;
-user.id = 777;
-
-// // stubbed in for testing
-// user.isLoggedIn = function(callback){
-//     callback(null, true;)
-// }
-
-// user.getId = function(){
-//     callback(null, 777);
-// }
-
-module.exports = user;
-
-},{}],7:[function(require,module,exports){
 var FormInput = require('./lib/input.jsx');
 var LoginForm = require('./lib/login_form.jsx');
 var RegisterForm = require('./lib/register_form.jsx');
 var Modal = require('./lib/modal.jsx');
 
+var services = require('./lib/services_handler.js');
+
 var LOGIN_BUTTON_STYLE = {
     position: 'absolute',
     top: '5px',
-    left: '5px'
+    right: '5px'
 }
 
 /**
 * Require the following props:
-*   endpoint[sql_login endpoint],
-*   loginCallback[function called afer login, passed user object]
-*   logoutCallback[function called afer logout]
+*   endpoint (sql_login endpoint),
+*   loginCallback (function called afer login, passed user object)
+*   logoutCallback (function called afer logout)
 */
 module.exports = React.createClass({displayName: "exports",
     getInitialState: function(){
+        this.loadUser();
         return({
             activeForm: 'login',
             isLoggedIn: false,
             user: null,
-            userFormIsVisible: false
+            userFormIsVisible: false,
+            hasLoaded: false
         });
     },
     handleClose: function(event){
@@ -719,16 +904,47 @@ module.exports = React.createClass({displayName: "exports",
         this.setState({activeForm: 'register'})
     },
     handleLoginButtonClick: function(event){
-        this.setState({userFormIsVisible: true})
+        var self = this;
+        if( !self.state.isLoggedIn ){
+            self.setState({userFormIsVisible: true});
+            return;
+        }
+        services.logout(self.props.endpoint, function(err){
+            if( err ){
+                alert(err);
+                return;
+            }
+            self.setState({isLoggedIn: false}, function(){
+                if( self.props.logoutCallback ){
+                    self.props.logoutCallback();
+                }
+            })
+        });
+    },
+    loadUser: function(){
+        var self = this;
+        services.getUser(self.props.endpoint, function(err, user){
+            if( err ){
+                console.log(err);
+                self.setState({hasLoaded: true})
+                return;
+            }
+            self.setState({isLoggedIn: true, user: user, hasLoaded: true},
+                          function(){
+                if( self.props.loginCallback ){ self.props.loginCallback(user); }
+            });
+        });
     },
     loginCallback: function(user){
-        this.setState({isLoggedIn: true, user: user})
-        if( this.props.loginCallback ){
-            this.props.loginCallback(user);
-        }
+        var self = this;
+        self.setState({isLoggedIn: true, user: user, userFormIsVisible: false},
+                      function(){
+            if( self.props.loginCallback ){ self.props.loginCallback(user); }
+        });
     },
     render: function(){
-        var self = this
+        var self = this;
+        if( !self.state.hasLoaded ){ return null; }
 
         var formVisible = {}
         var forms = ['login', 'register']
@@ -742,7 +958,7 @@ module.exports = React.createClass({displayName: "exports",
                     className: "sql-login-button button tiny", 
                     style: LOGIN_BUTTON_STYLE, 
                     onClick: this.handleLoginButtonClick}, 
-                    "Login"
+                    this.state.isLoggedIn ? 'Logout' : 'Login'
                 ), 
 
                 React.createElement(Modal, {
@@ -779,7 +995,29 @@ module.exports = React.createClass({displayName: "exports",
     }
 });
 
-},{"./lib/input.jsx":8,"./lib/login_form.jsx":9,"./lib/modal.jsx":10,"./lib/register_form.jsx":11}],8:[function(require,module,exports){
+},{"./lib/input.jsx":8,"./lib/login_form.jsx":9,"./lib/modal.jsx":10,"./lib/register_form.jsx":11,"./lib/services_handler.js":12}],7:[function(require,module,exports){
+/**
+* Takes property `message`, will display message if not empty
+* Optionally takes styles (object)
+*/
+module.exports = React.createClass({displayName: "exports",
+    defaultStyles: {
+    },
+    render: function(){
+
+        if( this.props.message === "" ){ return null; }
+
+        var styles = this.props.styles ? this.props.styles : this.defaultStyles;
+
+        return(
+            React.createElement("div", {className: "alert-box alert", style: styles}, 
+                this.props.message
+            )
+        );
+    }
+});
+
+},{}],8:[function(require,module,exports){
 module.exports = React.createClass({displayName: "exports",
 
     getInitialState: function(){
@@ -809,7 +1047,8 @@ module.exports = React.createClass({displayName: "exports",
 
 },{}],9:[function(require,module,exports){
 var FormInput = require('./input.jsx');
-var servicesHandler = require('./services_handler.js')
+var Alert = require('./alert.jsx');
+var servicesHandler = require('./services_handler.js');
 
 module.exports = React.createClass({displayName: "exports",
     getInitialState: function(){
@@ -842,9 +1081,7 @@ module.exports = React.createClass({displayName: "exports",
     render: function(){
         return(
             React.createElement("div", {className: "sql-login-login"}, 
-                React.createElement("div", {className: "sql-login-error-message"}, 
-                    this.state.errorMessage
-                ), 
+                React.createElement(Alert, {message: this.state.errorMessage}), 
                 React.createElement("form", {method: "POST", onSubmit: this.handleSubmit}, 
                     React.createElement(FormInput, {
                         name: "email", 
@@ -868,7 +1105,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 })
 
-},{"./input.jsx":8,"./services_handler.js":12}],10:[function(require,module,exports){
+},{"./alert.jsx":7,"./input.jsx":8,"./services_handler.js":12}],10:[function(require,module,exports){
 /**
 * should pass properites:
 *   visible: true/false
@@ -887,13 +1124,16 @@ module.exports = React.createClass({displayName: "exports",
             zIndex: 100
         }
 
+        var modalHeight = 0.92 * window.innerHeight;
+
         var modalStyle = {
-            // width: '96%',
             margin: '0 auto',
             marginTop: '20px',
             backgroundColor: '#FFF',
             padding: '20px',
-            boxShadow: '0 0 25px #444444'
+            boxShadow: '0 0 25px #444444',
+            overflow: 'scroll',
+            maxHeight: modalHeight
         }
 
         var closeButtonContainerStyle = {
@@ -915,7 +1155,7 @@ module.exports = React.createClass({displayName: "exports",
         var modalSize = this.props.size ? this.props.size : 'small';
         var modalClasses = '';
         if( modalSize === 'small' ){
-            modalClasses = 'small-12 medium-6 large-4';
+            modalClasses = 'small-12 medium-8 large-6';
         } else if( modalSize === 'medium' ){
             modalClasses = 'small-12 medium-10 large-8';
         } else {
@@ -945,16 +1185,18 @@ module.exports = React.createClass({displayName: "exports",
 });
 
 },{}],11:[function(require,module,exports){
+var Alert = require('./alert.jsx');
 var FormInput = require('./input.jsx');
 var servicesHandler = require('./services_handler.js')
 
 module.exports = React.createClass({displayName: "exports",
 
     passwordMinLength: 8,
+    usernameMinLength: 3,
     errorEmail: 'Email address is not valid.',
     errorPasswordsDontMatch: 'The passwords do not match.',
-    errorPasswordLength: 'The password must be at least ' +
-                          this.passwordMinLength + ' characters.',
+    errorPasswordLength: 'The password must be at least 8 characters.',
+    errorUsernameLength: 'The username can only contain letters, numbers, underscores, dots and dashes and must be at least 3 characters.',
 
     getInitialState: function(){
         return({errorMessage: ''});
@@ -964,25 +1206,30 @@ module.exports = React.createClass({displayName: "exports",
         event.preventDefault()
         var self = this;
 
-        var email = this.refs.email.getInputValue()
-        var passwordOne = this.refs.password.getInputValue()
-        var passwordTwo = this.refs.confirmPassword.getInputValue()
+        var email = this.refs.email.getInputValue();
+        var username = this.refs.username.getInputValue();
+        var passwordOne = this.refs.password.getInputValue();
+        var passwordTwo = this.refs.confirmPassword.getInputValue();
 
-        var validationResult = this.validate(email, passwordOne, passwordTwo)
+        var validationResult = this.validate(email, username, passwordOne, passwordTwo)
         if( validationResult !== true ){
             this.setState({errorMessage: validationResult})
             return;
         }
 
+        console.log('Registering ' + email);
         servicesHandler.register(this.props.endpoint,
                                  email,
+                                 username,
                                  passwordOne,
                                  function(err, response){
             if( err ){
+                console.log(err);
                 self.setState({errorMessage: err});
                 return;
             }
 
+            console.log(response);
             self.setState({errorMessage: ''});
 
             if( self.props.loginCallback ){
@@ -993,15 +1240,18 @@ module.exports = React.createClass({displayName: "exports",
     render: function(){
         return(
             React.createElement("div", {className: "sql-login-register"}, 
-                React.createElement("div", {className: "sql-login-error-message"}, 
-                    this.state.errorMessage
-                ), 
+                React.createElement(Alert, {message: this.state.errorMessage}), 
                 React.createElement("form", {method: "POST", onSubmit: this.handleSubmit}, 
                     React.createElement(FormInput, {
                         name: "email", 
                         type: "text", 
                         label: "Email", 
                         ref: "email"}), 
+                    React.createElement(FormInput, {
+                        name: "username", 
+                        type: "text", 
+                        label: "Username", 
+                        ref: "username"}), 
                     React.createElement(FormInput, {
                         name: "password", 
                         type: "password", 
@@ -1025,19 +1275,29 @@ module.exports = React.createClass({displayName: "exports",
             )
         )
     },
-    validate: function(email, passwordOne, passwordTwo){
+    validate: function(email, username, passwordOne, passwordTwo){
         if( !validateEmail(email) ){
             return this.errorEmail;
+        }
+        if( !validateUsername(username, this.usernameMinLength)){
+            return this.errorUsernameLength;
         }
         if( passwordOne !== passwordTwo ){
             return this.errorPasswordsDontMatch;
         }
         if( passwordOne.length < this.passwordMinLength ){
-            return this.errorPasswordLength
+            return this.errorPasswordLength;
         }
         return true;
     }
 })
+
+function validateUsername(username, minLength){
+    if( username.length < minLength ){
+        return false;
+    }
+    return(/^([a-zA-Z0-9]|\-|\_|\.)+$/.test(username));
+}
 
 // http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
 function validateEmail(email) {
@@ -1045,21 +1305,28 @@ function validateEmail(email) {
     return re.test(email);
 }
 
-},{"./input.jsx":8,"./services_handler.js":12}],12:[function(require,module,exports){
+},{"./alert.jsx":7,"./input.jsx":8,"./services_handler.js":12}],12:[function(require,module,exports){
 var STATUS_SUCCESS = 'success',
     STATUS_FAILURE = 'failure',
     STATUS_ERROR = 'error';
 
 module.exports = {
-    register: function(endpoint, email, password, callback){
+    getUser: function(endpoint, callback){
+        makeRequest({
+            method: 'GET',
+            url: endpoint
+        }, callback);
+    },
+    register: function(endpoint, email, username, password, callback){
         makeRequest({
             method: 'POST',
             url: endpoint + '/register',
             data: {
                 email: email,
+                username: username,
                 password: password
             }            
-        }, callback)
+        }, callback);
     },
     login: function(endpoint, email, password, callback){
         makeRequest({
@@ -1069,7 +1336,13 @@ module.exports = {
                 'email': email,
                 'password': password
             }
-        }, callback)
+        }, callback);
+    },
+    logout: function(endpoint, callback){
+        makeRequest({
+            method: 'POST',
+            url: endpoint + '/logout',
+        }, callback);
     }
 }
 

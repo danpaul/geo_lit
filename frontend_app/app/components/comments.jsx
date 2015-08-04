@@ -1,6 +1,6 @@
 var _ = require('underscore');
-var services = require('../lib/services.js');
-var geoLit = require('../lib/geo_lit.js');
+
+var SERVER_ERROR_MESSAGE = 'A server error occurred.';
 
 module.exports = React.createClass({
 
@@ -14,12 +14,11 @@ module.exports = React.createClass({
             type: "POST",
             'url': url,
             data: {
-                'comment': comment,
-                'userId': this.props.userId
+                'comment': comment
             },
             success: function(response){
                 if( response.status !== 'success' ){
-                    console.log(response);
+                    self.triggerNotice(response.errorMessage);
                 } else {
                     self.setState({hasLoaded: false});
                     self.loadComments(self.props.placeId);
@@ -27,19 +26,71 @@ module.exports = React.createClass({
             },
             error: function(err){
                 console.log(err);
+                self.triggerNotice(SERVER_ERROR_MESSAGE);
             },
             dataType: 'JSON'
         });
     },
 
+    handleFlag: function(commentId){
+
+        var self = this;
+        var url = self.props.endpoint + '/flag/' + commentId;
+
+        $.ajax({
+            type: "POST",
+            'url': url,
+            success: function(response){
+                if( response.status !== 'success' ){
+                    self.triggerNotice(response.errorMessage);
+                } else {
+                    self.triggerNotice('Comment Flagged');
+                }
+            },
+            error: function(err){
+                self.triggerNotice(SERVER_ERROR_MESSAGE);
+            },
+            dataType: 'JSON'
+        });
+
+    },
+    handleVote: function(direction, commentId){
+
+        var self = this;
+        var url = self.props.endpoint + '/comment/vote/' + direction +
+                        '/' + commentId;
+
+        $.ajax({
+            type: "POST",
+            'url': url,
+            success: function(response){
+                if( response.status !== 'success' ){
+                    self.triggerNotice(response.errorMessage);
+                } else {
+                    self.triggerNotice('Vote Added');
+                }
+            },
+            error: function(err){
+                self.triggerNotice(SERVER_ERROR_MESSAGE);
+            },
+            dataType: 'JSON'
+        });
+
+    },
     cleanComments: function(comments){
         var self = this;
         _.each(comments, function(comment){
             comment.addComment = self.addComment;
+            comment.handleVote = self.handleVote;
+            comment.handleFlag = self.handleFlag;
             if( comment.children.length !== 0 ){
                 self.cleanComments(comment.children);
             }
         })
+    },
+
+    componentDidMount: function(){
+        this.loadComments(this.props.placeId);
     },
 
     componentWillReceiveProps: function(nextProps){
@@ -50,7 +101,27 @@ module.exports = React.createClass({
     },
 
     getInitialState: function(){
-        return({ hasLoaded: false, comments: [] });
+        return({ hasLoaded: false, comments: [] , notice: null});
+    },
+
+    triggerNotice: function(message){
+        var self = this;
+        var noticeElement =
+            <div
+                style={{
+                    position: 'fixed',
+                    top: '10px',
+                    right: '10px'
+                }}
+                className={"alert-box alert"} >
+                {message}
+            </div>;
+
+        self.setState({notice: noticeElement}, function(){
+            setTimeout(function(){
+                self.setState({notice: null});
+            }, 2000)
+        });
     },
 
     loadComments: function(placeId){
@@ -62,6 +133,7 @@ module.exports = React.createClass({
             success: function(response){
                 if( response.status !== 'success' ){
                     console.log(response);
+                    self.triggerNotice(response.errorMessage);
                 } else {
                     self.cleanComments(response.data);
                     self.setState(
@@ -71,27 +143,26 @@ module.exports = React.createClass({
             },
             error: function(err){
                 console.log(err);
+                self.triggerNotice(SERVER_ERROR_MESSAGE);
             },
             dataType: 'JSON'
         });
     },
     render: function(){
+        var self = this;
 
         var addPlaceButtonClasses = 'js-add-place button expand';
 
-        if(this.props.activeComponent !== 'comments' || !this.state.hasLoaded){
-            return(<div> </div>);
+        if(!this.state.hasLoaded){
+            return(null);
         } else {
             return(
                 <div>
-                    <Comments
-                        comments={[{
-                            parent: 0,
-                            children: [],
-                            comment: '',
-                            addComment: this.addComment
-                        }]} />
-                    <h2> </h2>
+                    {self.state.notice}
+                    < Comment 
+                        children={[]}
+                        isTopLevel={true}
+                        addComment={this.addComment} />
                     <Comments comments={this.state.comments} />
                 </div>);
         }
@@ -106,26 +177,26 @@ var Comments = React.createClass({
         var self = this;
 
         var comments = this.props.comments.map(function(comment, index){
+
             var isOpen = false;
             if( comment.comment === null ){ isOpen = true; }
             var commentChildren = '';
-
             if( comment.children.length !== 0 ){
                 commentChildren = <Comments comments={comment.children} />;
             }
-
             return(
                 < Comment 
-                    parent={comment.id}
-                    childrenElement={commentChildren}
-                    children={comment.children}
-                    comment={comment.comment}
                     addComment={comment.addComment}
-                    // upVotes={comment.up_vote}
-                    // downVotes={comment.down_vote}
+                    children={comment.children}
+                    childrenElement={commentChildren}                    
+                    comment={comment.comment}                    
                     created={comment.created}
-                    rank={comment.rank}
-                    key={index} />
+                    handleVote={comment.handleVote}
+                    handleFlag={comment.handleFlag}
+                    id={comment.id}
+                    isTopLevel={false}
+                    key={index}
+                    rank={comment.rank} />
             );
         });
 
@@ -139,30 +210,63 @@ var Comments = React.createClass({
 var Comment = React.createClass({
 
     getInitialState: function(){
-        return({comment: '', showCommentForm: false, showChildren: true});
+        return({
+            comment: '',
+            showCommentForm: false,
+            showControls: false,
+            showChildren: true});
     },
     handleCancel: function(){
         this.setState({showCommentForm: false});
     },
+
     handleSubmit: function(event){
         event.preventDefault();
         event.stopPropagation();
         this.props.addComment(this.props.parent, this.state.comment);
     },
+
+    handleShowControl: function(){
+        this.setState({showControls: !this.state.showControls});
+    },
+    // handleSubmit: function(){
+    //     event.preventDefault();
+    //     this.props.addComment(this.props.id, this.state.comment);
+    // },
     handleToggleChilren: function(){
         var nextState = !this.state.showChildren;
-        this.setState({showChildren: nextState});
+        this.setState({
+            showChildren: nextState, showControls: false});
     },
     handleToggleCommentForm: function(){
         var nextState = !this.state.showCommentForm;
         this.setState({showCommentForm: nextState});
     },
+
+    handleUpvote: function(){
+        this.props.handleVote('up', this.props.id);
+    },
+
+    handleFlag: function(){
+        this.props.handleFlag(this.props.id);
+    },
+
+    handleDownvote: function(){
+        this.props.handleVote('down', this.props.id);
+    },
+
     render: function(){
 
         var self = this;
 
-        var commentFormStyle = this.state.showCommentForm ?
-                {display: 'block'} : {display: 'none'};
+        var commentFormStyle = this.state.showCommentForm &&
+                               this.state.showControls ?
+                                    {display: 'block', marginTop: '10px'} :
+                                    {display: 'none'};
+
+        if( self.props.isTopLevel ){
+            commentFormStyle = {display: 'block', marginTop: '10px'};
+        }
 
         var toggleCharacter = self.state.showChildren ? '-' : '+';
         var childContainerStyle = self.state.showChildren ?
@@ -172,15 +276,18 @@ var Comment = React.createClass({
         var commentRank = self.props.rank ? self.props.rank : 0;
 
         var createdDate = new Date(self.props.created * 1000).toString();
+        var hasChildren = this.props.children.length > 0;
 
         return(
-            <div className="sql-comment-container">
-                <div className="sql-comment-comment-meta">
-                    <span style={toggleButtonStle}>
-                        [<a onClick={this.handleToggleChilren}>
-                            {toggleCharacter}
-                        </a>]
-                    </span>
+            <div
+                className="sql-comment-container"
+                style={{marginTop: '10px'}} >
+
+                <div
+                    className="sql-comment-comment-meta"
+                    style={ self.props.isTopLevel ?
+                        {display: 'none'} : {marginTop: '10px'}}
+                >
                     <span className="sql-comment-username">
                         danpaul
                     </span> - 
@@ -196,12 +303,41 @@ var Comment = React.createClass({
                         {commentRank}
                     </span>
                 </div>
-                <div>{this.props.comment}</div>
-                <div style={!this.state.showCommentForm ? {display: 'block'} : {display: 'none'}}>
+                <div
+                    style={{cursor: 'pointer'}}
+                    onClick={self.handleShowControl}
+                >
+                    {this.props.comment}
+                </div>
+                <div style={ this.state.showControls ?
+                                {display: 'block'} : {display: 'none'}} >
+
+                </div>
+                <div style={ this.state.showControls ?
+                                {display: 'block'} : {display: 'none'}}>
+
+                    <a onClick={this.handleUpvote}>
+                        upvote
+                    </a>&nbsp;-&nbsp;
+                    <a onClick={this.handleDownvote}>
+                        downvote
+                    </a>&nbsp;-&nbsp;
+                    <a onClick={this.handleFlag}>
+                        flag
+                    </a>&nbsp;-&nbsp;
                     <a onClick={this.handleToggleCommentForm}>
                         comment
                     </a>
+                    <span style={ hasChildren ?
+                        {display: 'inline'} : {display: 'none'}}>
+
+                        &nbsp;-&nbsp;
+                        <a onClick={this.handleToggleChilren}>
+                            { this.state.showChildren ? 'collapse' : 'reveal' }
+                        </a>
+                    </span>
                 </div>
+
                 <div style={commentFormStyle}>
                     <textarea
                         placeholder="Add Comment"
@@ -218,6 +354,7 @@ var Comment = React.createClass({
                         onClick={self.handleCancel}
                     >Cancel</button>
                 </div>
+
                 <div style={childContainerStyle}>
                     {this.props.childrenElement}
                 </div>
@@ -227,4 +364,4 @@ var Comment = React.createClass({
     updateComment: function(event){
         this.setState({comment: event.target.value});
     }
-})
+});

@@ -1,4 +1,12 @@
+
 * add confirmation messaging after user logs in/registers
 * add authorization to comment middleware
+* handle success on registration
+* add about section
+* add username
+* change to custom marker for self
+* vertically center modal
+* disallow non-logged in users from voting
+* confirm back end for geo_lit requires auth
 * Add geo_lit to package.json after finished developing
 * Add sql_login_middleware to package.json after finished developing

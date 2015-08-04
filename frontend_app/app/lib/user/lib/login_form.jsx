@@ -1,5 +1,6 @@
 var FormInput = require('./input.jsx');
-var servicesHandler = require('./services_handler.js')
+var Alert = require('./alert.jsx');
+var servicesHandler = require('./services_handler.js');
 
 module.exports = React.createClass({
     getInitialState: function(){
@@ -32,9 +33,7 @@ module.exports = React.createClass({
     render: function(){
         return(
             <div className="sql-login-login">
-                <div className="sql-login-error-message">
-                    {this.state.errorMessage}
-                </div>
+                <Alert message={this.state.errorMessage} />
                 <form method="POST" onSubmit={this.handleSubmit}>
                     <FormInput
                         name="email"

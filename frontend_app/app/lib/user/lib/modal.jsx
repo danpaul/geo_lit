@@ -16,13 +16,16 @@ module.exports = React.createClass({
             zIndex: 100
         }
 
+        var modalHeight = 0.92 * window.innerHeight;
+
         var modalStyle = {
-            // width: '96%',
             margin: '0 auto',
             marginTop: '20px',
             backgroundColor: '#FFF',
             padding: '20px',
-            boxShadow: '0 0 25px #444444'
+            boxShadow: '0 0 25px #444444',
+            overflow: 'scroll',
+            maxHeight: modalHeight
         }
 
         var closeButtonContainerStyle = {
@@ -44,7 +47,7 @@ module.exports = React.createClass({
         var modalSize = this.props.size ? this.props.size : 'small';
         var modalClasses = '';
         if( modalSize === 'small' ){
-            modalClasses = 'small-12 medium-6 large-4';
+            modalClasses = 'small-12 medium-8 large-6';
         } else if( modalSize === 'medium' ){
             modalClasses = 'small-12 medium-10 large-8';
         } else {

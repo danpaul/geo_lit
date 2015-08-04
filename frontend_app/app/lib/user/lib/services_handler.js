@@ -3,15 +3,22 @@ var STATUS_SUCCESS = 'success',
     STATUS_ERROR = 'error';
 
 module.exports = {
-    register: function(endpoint, email, password, callback){
+    getUser: function(endpoint, callback){
+        makeRequest({
+            method: 'GET',
+            url: endpoint
+        }, callback);
+    },
+    register: function(endpoint, email, username, password, callback){
         makeRequest({
             method: 'POST',
             url: endpoint + '/register',
             data: {
                 email: email,
+                username: username,
                 password: password
             }            
-        }, callback)
+        }, callback);
     },
     login: function(endpoint, email, password, callback){
         makeRequest({
@@ -21,7 +28,13 @@ module.exports = {
                 'email': email,
                 'password': password
             }
-        }, callback)
+        }, callback);
+    },
+    logout: function(endpoint, callback){
+        makeRequest({
+            method: 'POST',
+            url: endpoint + '/logout',
+        }, callback);
     }
 }
 
