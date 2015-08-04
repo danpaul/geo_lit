@@ -315,8 +315,9 @@ var Comment = React.createClass({displayName: "Comment",
     handleCancel: function(){
         this.setState({showCommentForm: false});
     },
-    handleSubmit: function(){
+    handleSubmit: function(event){
         event.preventDefault();
+        event.stopPropagation();
         this.props.addComment(this.props.parent, this.state.comment);
     },
     handleToggleChilren: function(){
@@ -342,7 +343,6 @@ var Comment = React.createClass({displayName: "Comment",
         var commentRank = self.props.rank ? self.props.rank : 0;
 
         var createdDate = new Date(self.props.created * 1000).toString();
-console.log(createdDate)
 
         return(
             React.createElement("div", {className: "sql-comment-container"}, 
@@ -640,7 +640,6 @@ services.add = function(positionData, callbackIn){
         dataType: 'JSON'
     });
 }
-
 
 services.findNear = function(positionData, callbackIn){
     $.ajax({

@@ -144,8 +144,9 @@ var Comment = React.createClass({
     handleCancel: function(){
         this.setState({showCommentForm: false});
     },
-    handleSubmit: function(){
+    handleSubmit: function(event){
         event.preventDefault();
+        event.stopPropagation();
         this.props.addComment(this.props.parent, this.state.comment);
     },
     handleToggleChilren: function(){

@@ -25,6 +25,11 @@ module.exports = function(app){
 
     app.get('/', function(req, res){ res.sendFile('../public/index.html'); });
 
+    app.get('/healthcheck', function(req, res){
+console.log(req.session);
+        res.send('ok')
+    })
+
     app.get('/positions-all', function(req, res){
         var responseObject = getReponseObject()
         point.findAll(function(err, points){

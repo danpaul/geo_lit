@@ -34,10 +34,21 @@ app.use(bodyParser.urlencoded({extended: true}));
 */
 var knex = require('knex')(config.commentsDB);
 var options = { 'knex': knex, useStringPostId: true };
+options.authMiddleware = function(req, res, next){
+    if( req &&
+        req.session &&
+        req.session.isLoggedIn &&
+        req.session.isLoggedIn === true ){
+
+        next();
+    } else {
+        res.json({status: 'error', errorMessage: 'You must first log in.'});
+    }
+}
 var sqlCommentsMiddleware = require('sql_comments_middleware')(options);
 app.use('/discussion', sqlCommentsMiddleware);
 
-/** 
+/**
 *   User management middleware
 */
 var sqlLoginMiddleware = require('sql_login_middleware')({ 'knex': knex });

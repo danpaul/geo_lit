@@ -1,2 +1,4 @@
+* add confirmation messaging after user logs in/registers
+* add authorization to comment middleware
 * Add geo_lit to package.json after finished developing
 * Add sql_login_middleware to package.json after finished developing

@@ -23,7 +23,6 @@ services.add = function(positionData, callbackIn){
     });
 }
 
-
 services.findNear = function(positionData, callbackIn){
     $.ajax({
         type: "GET",
