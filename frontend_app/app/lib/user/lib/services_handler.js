@@ -4,10 +4,27 @@ var STATUS_SUCCESS = 'success',
 
 module.exports = {
     getUser: function(endpoint, callback){
+        // makeRequest({
+        //     method: 'GET',
+        //     url: endpoint
+        // }, callback);
+
+
         makeRequest({
             method: 'GET',
             url: endpoint
-        }, callback);
+        }, function(err, user){
+            if( err ){ callback(err); }
+            else{
+                if( !user || !user.id ){
+                    callback(null, null);
+                } else {
+                    callback(null, user);
+                }
+            }
+        });
+
+
     },
     register: function(endpoint, email, username, password, callback){
         makeRequest({
@@ -51,7 +68,7 @@ var makeRequest = function(requestData, callback){
     }
 
     requestData.error = function(jqXHR, status, errorThrown){
-        callback('Error contacting server. You might want to try again.');
+        callback('Error contacting server.');
     }
 
     $.ajax(requestData);

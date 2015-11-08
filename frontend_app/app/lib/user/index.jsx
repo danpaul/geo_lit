@@ -59,7 +59,7 @@ module.exports = React.createClass({
     loadUser: function(){
         var self = this;
         services.getUser(self.props.endpoint, function(err, user){
-            if( err ){
+            if( err || !user || !user.id ){
                 console.log(err);
                 self.setState({hasLoaded: true})
                 return;

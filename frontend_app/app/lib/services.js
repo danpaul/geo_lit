@@ -24,6 +24,7 @@ services.add = function(positionData, callbackIn){
 }
 
 services.findNear = function(positionData, callbackIn){
+
     $.ajax({
         type: "GET",
         url: config.geoLitEndpoint + '/positions-near',

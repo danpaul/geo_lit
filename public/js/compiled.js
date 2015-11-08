@@ -469,20 +469,20 @@ var Comment = React.createClass({displayName: "Comment",
     handleCancel: function(){
         this.setState({showCommentForm: false});
     },
-<<<<<<< HEAD
+
     handleSubmit: function(event){
         event.preventDefault();
         event.stopPropagation();
         this.props.addComment(this.props.parent, this.state.comment);
-=======
+    },
+
     handleShowControl: function(){
         this.setState({showControls: !this.state.showControls});
     },
-    handleSubmit: function(){
-        event.preventDefault();
-        this.props.addComment(this.props.id, this.state.comment);
->>>>>>> cc51bb63929b12dd6868a69f7d8184850f452b2e
-    },
+    // handleSubmit: function(){
+    //     event.preventDefault();
+    //     this.props.addComment(this.props.id, this.state.comment);
+    // },
     handleToggleChilren: function(){
         var nextState = !this.state.showChildren;
         this.setState({
@@ -526,10 +526,7 @@ var Comment = React.createClass({displayName: "Comment",
         var commentRank = self.props.rank ? self.props.rank : 0;
 
         var createdDate = new Date(self.props.created * 1000).toString();
-<<<<<<< HEAD
-=======
         var hasChildren = this.props.children.length > 0;
->>>>>>> cc51bb63929b12dd6868a69f7d8184850f452b2e
 
         return(
             React.createElement("div", {
@@ -618,6 +615,7 @@ var Comment = React.createClass({displayName: "Comment",
         this.setState({comment: event.target.value});
     }
 });
+
 
 },{"underscore":14}],4:[function(require,module,exports){
 var geoLit = {};
@@ -843,6 +841,7 @@ services.add = function(positionData, callbackIn){
 }
 
 services.findNear = function(positionData, callbackIn){
+
     $.ajax({
         type: "GET",
         url: config.geoLitEndpoint + '/positions-near',
@@ -924,7 +923,7 @@ module.exports = React.createClass({displayName: "exports",
     loadUser: function(){
         var self = this;
         services.getUser(self.props.endpoint, function(err, user){
-            if( err ){
+            if( err || !user || !user.id ){
                 console.log(err);
                 self.setState({hasLoaded: true})
                 return;
@@ -1312,10 +1311,27 @@ var STATUS_SUCCESS = 'success',
 
 module.exports = {
     getUser: function(endpoint, callback){
+        // makeRequest({
+        //     method: 'GET',
+        //     url: endpoint
+        // }, callback);
+
+
         makeRequest({
             method: 'GET',
             url: endpoint
-        }, callback);
+        }, function(err, user){
+            if( err ){ callback(err); }
+            else{
+                if( !user || !user.id ){
+                    callback(null, null);
+                } else {
+                    callback(null, user);
+                }
+            }
+        });
+
+
     },
     register: function(endpoint, email, username, password, callback){
         makeRequest({
@@ -1359,7 +1375,7 @@ var makeRequest = function(requestData, callback){
     }
 
     requestData.error = function(jqXHR, status, errorThrown){
-        callback('Error contacting server. You might want to try again.');
+        callback('Error contacting server.');
     }
 
     $.ajax(requestData);
@@ -1368,7 +1384,8 @@ var makeRequest = function(requestData, callback){
 },{}],13:[function(require,module,exports){
 var config = {};
 
-if( window.location.href.toLowerCase().indexOf('localhost') !==  -1 ){
+if( window.location.href.toLowerCase().indexOf('localhost') !==  -1 ||
+    window.location.href.toLowerCase().indexOf('0.0.0.0') !==  -1 ){
     config.environment = 'development';
 } else {
     config.environment = 'production';

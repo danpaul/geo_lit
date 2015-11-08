@@ -26,7 +26,7 @@ module.exports = function(app){
     app.get('/', function(req, res){ res.sendFile('../public/index.html'); });
 
     app.get('/healthcheck', function(req, res){
-console.log(req.session);
+        console.log(req.session);
         res.send('ok')
     })
 

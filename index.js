@@ -51,7 +51,8 @@ app.use('/discussion', sqlCommentsMiddleware);
 /**
 *   User management middleware
 */
-var sqlLoginMiddleware = require('sql_login_middleware')({ 'knex': knex, useUsername: true });
+var sqlLoginMiddleware = require('sql_login_middleware')({'knex': knex,
+                                                          useUsername: true });
 app.use('/user', sqlLoginMiddleware);
 
 /*******************************************************************************
