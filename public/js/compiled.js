@@ -260,7 +260,7 @@ module.exports = React.createClass({displayName: "exports",
 
         var self = this;
         var url = self.props.endpoint + '/comment/' + self.props.placeId +
-                    '/' + parentId;
+                  '/' + parentId;
 
         $.ajax({
             type: "POST",
@@ -441,6 +441,7 @@ var Comments = React.createClass({displayName: "Comments",
                     addComment: comment.addComment, 
                     children: comment.children, 
                     childrenElement: commentChildren, 
+                    parent: comment.id, 
                     comment: comment.comment, 
                     created: comment.created, 
                     handleVote: comment.handleVote, 

@@ -8,7 +8,7 @@ module.exports = React.createClass({
 
         var self = this;
         var url = self.props.endpoint + '/comment/' + self.props.placeId +
-                    '/' + parentId;
+                  '/' + parentId;
 
         $.ajax({
             type: "POST",
@@ -188,7 +188,8 @@ var Comments = React.createClass({
                 < Comment 
                     addComment={comment.addComment}
                     children={comment.children}
-                    childrenElement={commentChildren}                    
+                    childrenElement={commentChildren}
+                    parent={comment.id}
                     comment={comment.comment}                    
                     created={comment.created}
                     handleVote={comment.handleVote}
