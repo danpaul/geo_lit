@@ -24,7 +24,11 @@ module.exports = React.createClass({
         var passwordOne = this.refs.password.getInputValue();
         var passwordTwo = this.refs.confirmPassword.getInputValue();
 
-        var validationResult = this.validate(email, username, passwordOne, passwordTwo)
+        var validationResult = this.validate(email,
+                                             username,
+                                             passwordOne,
+                                             passwordTwo);
+
         if( validationResult !== true ){
             this.setState({errorMessage: validationResult})
             return;
@@ -42,11 +46,11 @@ module.exports = React.createClass({
                 return;
             }
 
-            console.log(response);
+            // console.log(response);
             self.setState({errorMessage: ''});
 
             if( self.props.loginCallback ){
-                self.props.loginCallback();
+                self.props.loginCallback(response.user);
             }
         })
     },

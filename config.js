@@ -17,12 +17,13 @@ if( config.environment === 'development' ){
     config.port = 3000;
 
     config.commentsDB = {
+        // debug: true,
         client: 'mysql',
         connection: {
             host: 'localhost',
             user: 'root',
             password: 'root',
-            database: 'sql_comment',
+            database: 'geo_lit',
             port:  8889
         }
     };

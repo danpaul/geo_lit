@@ -32,4 +32,20 @@ geo-lit-place-click [_id: place id]
 
 ## Todo
 
++ you should be logged in after registering
+
+update:
+    /node_modules/sql_login_middleware/index.js
+    /frontend_app/app/lib/geo_lit.js
+
+user auth:
+    /node_modules/sql_comments_middleware/index.js
+
+/node_modules/sql_comments_middleware/node_modules/sql_comment/models/comment.js
+/node_modules/sql_comments_middleware/node_modules/sql_comment/index.js
+/node_modules/sql_comments_middleware/node_modules/sql_comment/index.js
+/node_modules/sql_comments_middleware/index.js
+
+???
 sync /node_modules/sql_login_middleware/index.js with repo
+sync /node_modules/sql_comments_middleware with repo

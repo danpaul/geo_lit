@@ -4,12 +4,6 @@ var STATUS_SUCCESS = 'success',
 
 module.exports = {
     getUser: function(endpoint, callback){
-        // makeRequest({
-        //     method: 'GET',
-        //     url: endpoint
-        // }, callback);
-
-
         makeRequest({
             method: 'GET',
             url: endpoint
@@ -23,8 +17,6 @@ module.exports = {
                 }
             }
         });
-
-
     },
     register: function(endpoint, email, username, password, callback){
         makeRequest({

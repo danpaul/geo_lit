@@ -72,9 +72,13 @@ module.exports = React.createClass({
     },
     loginCallback: function(user){
         var self = this;
-        self.setState({isLoggedIn: true, user: user, userFormIsVisible: false},
+        self.setState({isLoggedIn: true, user: user,
+                       userFormIsVisible: false},
                       function(){
-            if( self.props.loginCallback ){ self.props.loginCallback(user); }
+
+            if( self.props.loginCallback ){
+                self.props.loginCallback(user);
+            }
         });
     },
     render: function(){

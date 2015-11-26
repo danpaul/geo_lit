@@ -32,6 +32,8 @@ geoLit.zoomLevel = 12;
 
 *******************************************************************************/
 
+geoLit.user = null;
+
 // creates the actual map in the DOM
 geoLit.createMap = function(){
     var mapOptions = {
@@ -76,7 +78,6 @@ geoLit.updatePosition = function(callbackIn){
     }, callbackIn);
 }
 
-// asdf
 geoLit.addPlacesToMap = function(places){
 
     _.each(places, function(place){
@@ -97,7 +98,6 @@ geoLit.addPlacesToMap = function(places){
         google.maps.event.addListener(geoLit.placeMarkers[place._id],
                                     'click',
                                     function(){
-console.log('here')
             $(document).trigger('geo-lit-place-click', [this.geoLit]);
         });
     })
@@ -175,6 +175,11 @@ geoLit.intervalCallback = function(){
 // add place with title to map
 geoLit.addPlace = function(title, callback){
 
+    if( !geoLit.user ){
+        callback('User must be logged in to add place.')
+        return;
+    }
+
     geoLit.getPosition(function(err, location){
         if( err ){
             callback('Unable to find location.');
@@ -184,12 +189,16 @@ geoLit.addPlace = function(title, callback){
         var placeObject = {};
         placeObject.location = [location.longitude, location.latitude];
         placeObject.title = title;
-        placeObject.user = user.id;
+        placeObject.user = geoLit.user.id;
         services.add(placeObject, function(err, resp){
             if( err ){ callback(err); }
             else { callback(null, resp); }
         })
     })
+}
+
+geoLit.setUser = function(user){
+    geoLit.user = user;
 }
 
 module.exports = geoLit

@@ -33,7 +33,11 @@ app.use(bodyParser.urlencoded({extended: true}));
 *   Commenting middleware
 */
 var knex = require('knex')(config.commentsDB);
-var options = { 'knex': knex, useStringPostId: true };
+var options = {
+    'knex': knex,
+    useStringPostId: true,
+    useUsername: true
+};
 options.authMiddleware = function(req, res, next){
     if( req &&
         req.session &&

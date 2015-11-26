@@ -66,6 +66,7 @@ var Main = React.createClass({
     },
 
     loginCallback: function(user){
+        geoLit.setUser(user);
         this.setState({
             user: user,
             userId: user.id,

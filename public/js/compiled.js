@@ -67,6 +67,7 @@ var Main = React.createClass({displayName: "Main",
     },
 
     loginCallback: function(user){
+        geoLit.setUser(user);
         this.setState({
             user: user,
             userId: user.id,
@@ -161,6 +162,7 @@ module.exports = React.createClass({displayName: "exports",
         }
 
         geoLit.addPlace(this.state.placeValue, function(errorMessage, place){
+
             if( errorMessage ){
                 self.setState({'errorMessage': errorMessage});
             } else {
@@ -652,6 +654,8 @@ geoLit.zoomLevel = 12;
 
 *******************************************************************************/
 
+geoLit.user = null;
+
 // creates the actual map in the DOM
 geoLit.createMap = function(){
     var mapOptions = {
@@ -696,7 +700,6 @@ geoLit.updatePosition = function(callbackIn){
     }, callbackIn);
 }
 
-// asdf
 geoLit.addPlacesToMap = function(places){
 
     _.each(places, function(place){
@@ -717,7 +720,6 @@ geoLit.addPlacesToMap = function(places){
         google.maps.event.addListener(geoLit.placeMarkers[place._id],
                                     'click',
                                     function(){
-console.log('here')
             $(document).trigger('geo-lit-place-click', [this.geoLit]);
         });
     })
@@ -795,6 +797,11 @@ geoLit.intervalCallback = function(){
 // add place with title to map
 geoLit.addPlace = function(title, callback){
 
+    if( !geoLit.user ){
+        callback('User must be logged in to add place.')
+        return;
+    }
+
     geoLit.getPosition(function(err, location){
         if( err ){
             callback('Unable to find location.');
@@ -804,12 +811,16 @@ geoLit.addPlace = function(title, callback){
         var placeObject = {};
         placeObject.location = [location.longitude, location.latitude];
         placeObject.title = title;
-        placeObject.user = user.id;
+        placeObject.user = geoLit.user.id;
         services.add(placeObject, function(err, resp){
             if( err ){ callback(err); }
             else { callback(null, resp); }
         })
     })
+}
+
+geoLit.setUser = function(user){
+    geoLit.user = user;
 }
 
 module.exports = geoLit
@@ -936,9 +947,13 @@ module.exports = React.createClass({displayName: "exports",
     },
     loginCallback: function(user){
         var self = this;
-        self.setState({isLoggedIn: true, user: user, userFormIsVisible: false},
+        self.setState({isLoggedIn: true, user: user,
+                       userFormIsVisible: false},
                       function(){
-            if( self.props.loginCallback ){ self.props.loginCallback(user); }
+
+            if( self.props.loginCallback ){
+                self.props.loginCallback(user);
+            }
         });
     },
     render: function(){
@@ -1210,7 +1225,11 @@ module.exports = React.createClass({displayName: "exports",
         var passwordOne = this.refs.password.getInputValue();
         var passwordTwo = this.refs.confirmPassword.getInputValue();
 
-        var validationResult = this.validate(email, username, passwordOne, passwordTwo)
+        var validationResult = this.validate(email,
+                                             username,
+                                             passwordOne,
+                                             passwordTwo);
+
         if( validationResult !== true ){
             this.setState({errorMessage: validationResult})
             return;
@@ -1228,11 +1247,11 @@ module.exports = React.createClass({displayName: "exports",
                 return;
             }
 
-            console.log(response);
+            // console.log(response);
             self.setState({errorMessage: ''});
 
             if( self.props.loginCallback ){
-                self.props.loginCallback();
+                self.props.loginCallback(response.user);
             }
         })
     },
@@ -1311,12 +1330,6 @@ var STATUS_SUCCESS = 'success',
 
 module.exports = {
     getUser: function(endpoint, callback){
-        // makeRequest({
-        //     method: 'GET',
-        //     url: endpoint
-        // }, callback);
-
-
         makeRequest({
             method: 'GET',
             url: endpoint
@@ -1330,8 +1343,6 @@ module.exports = {
                 }
             }
         });
-
-
     },
     register: function(endpoint, email, username, password, callback){
         makeRequest({

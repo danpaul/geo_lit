@@ -31,6 +31,7 @@ module.exports = React.createClass({
         }
 
         geoLit.addPlace(this.state.placeValue, function(errorMessage, place){
+
             if( errorMessage ){
                 self.setState({'errorMessage': errorMessage});
             } else {
