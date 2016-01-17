@@ -1,134 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/*******************************************************************************
-
-                    SETUP
-
-*******************************************************************************/
-
-var Modal = require('./lib/user/lib/modal.jsx');
-
-var MAP_ID = 'map-canvas'
-
-var geoLit = require('./lib/geo_lit');
-var config = require('../config');
-
-geoLit.init(MAP_ID, function(err){
-    if( err ){ console.log(err); }
-    else{
-        console.log('map initialzed');
-    }
-})
-
-/*******************************************************************************
-
-                    REACT
-
-*******************************************************************************/
-
-var AddPlaceForm = require('./components/addPlaceForm.jsx');
-var Comments = require('./components/comments.jsx');
-var UserForm = require('./lib/user/index.jsx');
-
-var Main = React.createClass({displayName: "Main",
-
-    // called on success when new place is added
-    addPlaceCallback: function(place){
-        var self = this;
-        self.setState({
-            activeComponent: 'comments',
-            placeId: place._id,
-            placeTitle: place.title
-        });
-    },
-
-    componentDidMount: function(){
-        var self = this;
-        $(document).on('geo-lit-place-click', function(event, args){
-            self.setState({
-                activeComponent: 'comments',
-                placeId: args._id,
-                placeTitle: args.title,
-            })
-        });
-    },
-
-    getInitialState: function(){
-        return {
-            activeComponent: 'addPlaceForm',
-            placeId: null,
-            userId: null,
-            user: null,
-            isLoggedIn: false
-        };
-    },
-
-    handleCommentModalClose: function(){
-        this.setState({activeComponent: null});
-    },
-
-    loginCallback: function(user){
-        geoLit.setUser(user);
-        this.setState({
-            user: user,
-            userId: user.id,
-            isLoggedIn: true
-        })
-    },
-
-    logoutCallback: function(){
-        this.setState({
-            user: null,
-            userId: null,
-            isLoggedIn: false
-        })
-    },
-
-    render: function(){
-        var self = this;
-
-        var addPlaceElement = null;
-        if( self.state.isLoggedIn ){
-            addPlaceElement =
-                React.createElement(AddPlaceForm, {
-                    activeComponent: self.state.activeComponent, 
-                    addPlaceCallback: self.addPlaceCallback});
-        }
-
-        var commentElement = null;
-        if( this.state.activeComponent === "comments" ){
-            commentElement = 
-                React.createElement(Modal, {
-                    handleClose: this.handleCommentModalClose, 
-                    size: "large", 
-                    visible: true}, 
-
-                    React.createElement("h2", null, this.state.placeTitle), 
-
-                    React.createElement(Comments, {
-                        activeComponent: this.state.activeComponent, 
-                        endpoint: config.commentEndpoint, 
-                        placeId: this.state.placeId, 
-                        placeTitle: this.state.placeTitle, 
-                        userId: this.state.userId})
-                )
-        }
-
-        return(
-            React.createElement("div", null, 
-                React.createElement(UserForm, {
-                    endpoint: config.userEndpoint, 
-                    loginCallback: this.loginCallback, 
-                    logoutCallback: this.logoutCallback}), 
-                addPlaceElement, 
-                commentElement
-            )
-        );
-    }
-});
-
-React.render(React.createElement(Main, null), document.getElementById('content'));
-
-},{"../config":13,"./components/addPlaceForm.jsx":2,"./components/comments.jsx":3,"./lib/geo_lit":4,"./lib/user/index.jsx":6,"./lib/user/lib/modal.jsx":10}],2:[function(require,module,exports){
 var services = require('../lib/services.js');
 var geoLit = require('../lib/geo_lit.js');
 
@@ -249,7 +119,7 @@ module.exports = React.createClass({displayName: "exports",
 
 });
 
-},{"../lib/geo_lit.js":4,"../lib/services.js":5,"../lib/user/lib/alert.jsx":7,"../lib/user/lib/modal.jsx":10}],3:[function(require,module,exports){
+},{"../lib/geo_lit.js":3,"../lib/services.js":4,"../lib/user/lib/alert.jsx":6,"../lib/user/lib/modal.jsx":9}],2:[function(require,module,exports){
 var _ = require('underscore');
 
 var SERVER_ERROR_MESSAGE = 'A server error occurred.';
@@ -619,8 +489,7 @@ var Comment = React.createClass({displayName: "Comment",
     }
 });
 
-
-},{"underscore":14}],4:[function(require,module,exports){
+},{"underscore":14}],3:[function(require,module,exports){
 var geoLit = {};
 
 var _ = require('underscore');
@@ -826,7 +695,7 @@ geoLit.setUser = function(user){
 
 module.exports = geoLit
 
-},{"./services":5,"underscore":14}],5:[function(require,module,exports){
+},{"./services":4,"underscore":14}],4:[function(require,module,exports){
 var services = {}
 var config = require('../../config.js')
 
@@ -873,7 +742,7 @@ services.findNear = function(positionData, callbackIn){
 
 module.exports = services;
 
-},{"../../config.js":13}],6:[function(require,module,exports){
+},{"../../config.js":13}],5:[function(require,module,exports){
 var FormInput = require('./lib/input.jsx');
 var LoginForm = require('./lib/login_form.jsx');
 var RegisterForm = require('./lib/register_form.jsx');
@@ -1010,7 +879,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 });
 
-},{"./lib/input.jsx":8,"./lib/login_form.jsx":9,"./lib/modal.jsx":10,"./lib/register_form.jsx":11,"./lib/services_handler.js":12}],7:[function(require,module,exports){
+},{"./lib/input.jsx":7,"./lib/login_form.jsx":8,"./lib/modal.jsx":9,"./lib/register_form.jsx":10,"./lib/services_handler.js":11}],6:[function(require,module,exports){
 /**
 * Takes property `message`, will display message if not empty
 * Optionally takes styles (object)
@@ -1032,7 +901,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 });
 
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = React.createClass({displayName: "exports",
 
     getInitialState: function(){
@@ -1060,7 +929,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 })
 
-},{}],9:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var FormInput = require('./input.jsx');
 var Alert = require('./alert.jsx');
 var servicesHandler = require('./services_handler.js');
@@ -1120,7 +989,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 })
 
-},{"./alert.jsx":7,"./input.jsx":8,"./services_handler.js":12}],10:[function(require,module,exports){
+},{"./alert.jsx":6,"./input.jsx":7,"./services_handler.js":11}],9:[function(require,module,exports){
 /**
 * should pass properites:
 *   visible: true/false
@@ -1199,7 +1068,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 });
 
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var Alert = require('./alert.jsx');
 var FormInput = require('./input.jsx');
 var servicesHandler = require('./services_handler.js')
@@ -1324,7 +1193,7 @@ function validateEmail(email) {
     return re.test(email);
 }
 
-},{"./alert.jsx":7,"./input.jsx":8,"./services_handler.js":12}],12:[function(require,module,exports){
+},{"./alert.jsx":6,"./input.jsx":7,"./services_handler.js":11}],11:[function(require,module,exports){
 var STATUS_SUCCESS = 'success',
     STATUS_FAILURE = 'failure',
     STATUS_ERROR = 'error';
@@ -1393,7 +1262,137 @@ var makeRequest = function(requestData, callback){
     $.ajax(requestData);
 }
 
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
+/*******************************************************************************
+
+                    SETUP
+
+*******************************************************************************/
+
+var Modal = require('./lib/user/lib/modal.jsx');
+
+var MAP_ID = 'map-canvas'
+
+var geoLit = require('./lib/geo_lit');
+var config = require('../config');
+
+geoLit.init(MAP_ID, function(err){
+    if( err ){ console.log(err); }
+    else{
+        console.log('map initialzed');
+    }
+})
+
+/*******************************************************************************
+
+                    REACT
+
+*******************************************************************************/
+
+var AddPlaceForm = require('./components/addPlaceForm.jsx');
+var Comments = require('./components/comments.jsx');
+var UserForm = require('./lib/user/index.jsx');
+
+var Main = React.createClass({displayName: "Main",
+
+    // called on success when new place is added
+    addPlaceCallback: function(place){
+        var self = this;
+        self.setState({
+            activeComponent: 'comments',
+            placeId: place._id,
+            placeTitle: place.title
+        });
+    },
+
+    componentDidMount: function(){
+        var self = this;
+        $(document).on('geo-lit-place-click', function(event, args){
+            self.setState({
+                activeComponent: 'comments',
+                placeId: args._id,
+                placeTitle: args.title,
+            })
+        });
+    },
+
+    getInitialState: function(){
+        return {
+            activeComponent: 'addPlaceForm',
+            placeId: null,
+            userId: null,
+            user: null,
+            isLoggedIn: false
+        };
+    },
+
+    handleCommentModalClose: function(){
+        this.setState({activeComponent: null});
+    },
+
+    loginCallback: function(user){
+        geoLit.setUser(user);
+        this.setState({
+            user: user,
+            userId: user.id,
+            isLoggedIn: true
+        })
+    },
+
+    logoutCallback: function(){
+        this.setState({
+            user: null,
+            userId: null,
+            isLoggedIn: false
+        })
+    },
+
+    render: function(){
+        var self = this;
+
+        var addPlaceElement = null;
+        if( self.state.isLoggedIn ){
+            addPlaceElement =
+                React.createElement(AddPlaceForm, {
+                    activeComponent: self.state.activeComponent, 
+                    addPlaceCallback: self.addPlaceCallback});
+        }
+
+        var commentElement = null;
+        if( this.state.activeComponent === "comments" ){
+            commentElement = 
+                React.createElement(Modal, {
+                    handleClose: this.handleCommentModalClose, 
+                    size: "large", 
+                    visible: true}, 
+
+                    React.createElement("h2", null, this.state.placeTitle), 
+
+                    React.createElement(Comments, {
+                        activeComponent: this.state.activeComponent, 
+                        endpoint: config.commentEndpoint, 
+                        placeId: this.state.placeId, 
+                        placeTitle: this.state.placeTitle, 
+                        userId: this.state.userId})
+                )
+        }
+
+        return(
+            React.createElement("div", null, 
+                React.createElement(UserForm, {
+                    endpoint: config.userEndpoint, 
+                    loginCallback: this.loginCallback, 
+                    logoutCallback: this.logoutCallback}), 
+                addPlaceElement, 
+                commentElement
+            )
+        );
+    }
+});
+
+React.render(React.createElement(Main, null), document.getElementById('content'));
+
+},{"../config":13,"./components/addPlaceForm.jsx":1,"./components/comments.jsx":2,"./lib/geo_lit":3,"./lib/user/index.jsx":5,"./lib/user/lib/modal.jsx":9}],13:[function(require,module,exports){
 var config = {};
 
 if( window.location.href.toLowerCase().indexOf('localhost') !==  -1 ||
@@ -2966,4 +2965,4 @@ module.exports = config;
   }
 }.call(this));
 
-},{}]},{},[1]);
+},{}]},{},[12]);

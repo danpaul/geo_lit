@@ -1,0 +1,435 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node', '/usr/local/bin/npm', 'install' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.40
+4 verbose readDependencies using package.json deps
+5 verbose install where, deps [ '/Applications/MAMP/htdocs/dan/geo_lit/node_modules/sql_comments_middleware',
+5 verbose install   [ 'express', 'sql_comments' ] ]
+6 info preinstall sql_comments_middleware@1.0.0
+7 verbose readDependencies using package.json deps
+8 verbose cache add [ 'sql_comments@git://github.com/danpaul/sql_comments', null ]
+9 verbose cache add name=undefined spec="sql_comments@git://github.com/danpaul/sql_comments" args=["sql_comments@git://github.com/danpaul/sql_comments",null]
+10 verbose parsed url { protocol: null,
+10 verbose parsed url   slashes: null,
+10 verbose parsed url   auth: null,
+10 verbose parsed url   host: null,
+10 verbose parsed url   port: null,
+10 verbose parsed url   hostname: null,
+10 verbose parsed url   hash: null,
+10 verbose parsed url   search: null,
+10 verbose parsed url   query: null,
+10 verbose parsed url   pathname: 'sql_comments@git://github.com/danpaul/sql_comments',
+10 verbose parsed url   path: 'sql_comments@git://github.com/danpaul/sql_comments',
+10 verbose parsed url   href: 'sql_comments@git://github.com/danpaul/sql_comments' }
+11 verbose cache add [ 'express@^4.12.3', null ]
+12 verbose cache add name=undefined spec="express@^4.12.3" args=["express@^4.12.3",null]
+13 verbose parsed url { protocol: null,
+13 verbose parsed url   slashes: null,
+13 verbose parsed url   auth: null,
+13 verbose parsed url   host: null,
+13 verbose parsed url   port: null,
+13 verbose parsed url   hostname: null,
+13 verbose parsed url   hash: null,
+13 verbose parsed url   search: null,
+13 verbose parsed url   query: null,
+13 verbose parsed url   pathname: 'express@^4.12.3',
+13 verbose parsed url   path: 'express@^4.12.3',
+13 verbose parsed url   href: 'express@^4.12.3' }
+14 verbose cache add name="sql_comments" spec="git://github.com/danpaul/sql_comments" args=["sql_comments","git://github.com/danpaul/sql_comments"]
+15 verbose parsed url { protocol: 'git:',
+15 verbose parsed url   slashes: true,
+15 verbose parsed url   auth: null,
+15 verbose parsed url   host: 'github.com',
+15 verbose parsed url   port: null,
+15 verbose parsed url   hostname: 'github.com',
+15 verbose parsed url   hash: null,
+15 verbose parsed url   search: null,
+15 verbose parsed url   query: null,
+15 verbose parsed url   pathname: '/danpaul/sql_comments',
+15 verbose parsed url   path: '/danpaul/sql_comments',
+15 verbose parsed url   href: 'git://github.com/danpaul/sql_comments' }
+16 verbose cache add name="express" spec="^4.12.3" args=["express","^4.12.3"]
+17 verbose parsed url { protocol: null,
+17 verbose parsed url   slashes: null,
+17 verbose parsed url   auth: null,
+17 verbose parsed url   host: null,
+17 verbose parsed url   port: null,
+17 verbose parsed url   hostname: null,
+17 verbose parsed url   hash: null,
+17 verbose parsed url   search: null,
+17 verbose parsed url   query: null,
+17 verbose parsed url   pathname: '^4.12.3',
+17 verbose parsed url   path: '^4.12.3',
+17 verbose parsed url   href: '^4.12.3' }
+18 verbose addNamed [ 'express', '^4.12.3' ]
+19 verbose addNamed [ null, '>=4.12.3-0 <5.0.0-0' ]
+20 silly lockFile 431f3030--github-com-danpaul-sql-comments git://github.com/danpaul/sql_comments
+21 verbose lock git://github.com/danpaul/sql_comments /Users/danbreczinski/.npm/431f3030--github-com-danpaul-sql-comments.lock
+22 silly lockFile dbce67be-express-4-12-3 express@^4.12.3
+23 verbose lock express@^4.12.3 /Users/danbreczinski/.npm/dbce67be-express-4-12-3.lock
+24 verbose addRemoteGit [ 'git://github.com/danpaul/sql_comments', 'master' ]
+25 silly addNameRange { name: 'express', range: '>=4.12.3-0 <5.0.0-0', hasData: false }
+26 verbose request where is /express
+27 verbose request registry https://registry.npmjs.org/
+28 verbose request id b759156ae558bd40
+29 verbose url raw /express
+30 verbose url resolving [ 'https://registry.npmjs.org/', './express' ]
+31 verbose url resolved https://registry.npmjs.org/express
+32 verbose request where is https://registry.npmjs.org/express
+33 info trying registry request attempt 1 at 14:58:17
+34 verbose etag "9HUJ4LVN30GUC142OLH6FLDUB"
+35 http GET https://registry.npmjs.org/express
+36 verbose git clone git://github.com/danpaul/sql_comments Cloning into bare repository '/Users/danbreczinski/.npm/_git-remotes/git-github-com-danpaul-sql-comments-431f3030'...
+37 http 200 https://registry.npmjs.org/express
+38 silly registry.get cb [ 200,
+38 silly registry.get   { server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+38 silly registry.get     etag: '"BFCABD7DYC4DMCU91JCMJ9Z59"',
+38 silly registry.get     'content-type': 'application/json',
+38 silly registry.get     'cache-control': 'max-age=60',
+38 silly registry.get     'content-length': '528535',
+38 silly registry.get     'accept-ranges': 'bytes',
+38 silly registry.get     date: 'Tue, 24 Nov 2015 19:58:17 GMT',
+38 silly registry.get     via: '1.1 varnish',
+38 silly registry.get     age: '27',
+38 silly registry.get     connection: 'keep-alive',
+38 silly registry.get     'x-served-by': 'cache-lax1430-LAX',
+38 silly registry.get     'x-cache': 'HIT',
+38 silly registry.get     'x-cache-hits': '3',
+38 silly registry.get     'x-timer': 'S1448395097.356510,VS0,VE0',
+38 silly registry.get     vary: 'Accept' } ]
+39 silly addNameRange number 2 { name: 'express', range: '>=4.12.3-0 <5.0.0-0', hasData: true }
+40 silly addNameRange versions [ 'express',
+40 silly addNameRange   [ '0.14.0',
+40 silly addNameRange     '0.14.1',
+40 silly addNameRange     '1.0.0',
+40 silly addNameRange     '1.0.1',
+40 silly addNameRange     '1.0.2',
+40 silly addNameRange     '1.0.3',
+40 silly addNameRange     '1.0.4',
+40 silly addNameRange     '1.0.5',
+40 silly addNameRange     '1.0.6',
+40 silly addNameRange     '1.0.7',
+40 silly addNameRange     '1.0.8',
+40 silly addNameRange     '2.0.0',
+40 silly addNameRange     '2.1.0',
+40 silly addNameRange     '2.1.1',
+40 silly addNameRange     '2.2.0',
+40 silly addNameRange     '2.2.1',
+40 silly addNameRange     '2.2.2',
+40 silly addNameRange     '2.3.0',
+40 silly addNameRange     '2.3.1',
+40 silly addNameRange     '2.3.2',
+40 silly addNameRange     '2.3.3',
+40 silly addNameRange     '2.3.4',
+40 silly addNameRange     '2.3.5',
+40 silly addNameRange     '2.3.6',
+40 silly addNameRange     '2.3.7',
+40 silly addNameRange     '2.3.8',
+40 silly addNameRange     '2.3.9',
+40 silly addNameRange     '2.3.10',
+40 silly addNameRange     '2.3.11',
+40 silly addNameRange     '2.3.12',
+40 silly addNameRange     '2.4.0',
+40 silly addNameRange     '2.4.1',
+40 silly addNameRange     '2.4.2',
+40 silly addNameRange     '2.4.3',
+40 silly addNameRange     '2.4.4',
+40 silly addNameRange     '2.4.5',
+40 silly addNameRange     '2.4.6',
+40 silly addNameRange     '2.4.7',
+40 silly addNameRange     '2.5.0',
+40 silly addNameRange     '2.5.1',
+40 silly addNameRange     '2.5.2',
+40 silly addNameRange     '2.5.3',
+40 silly addNameRange     '2.5.4',
+40 silly addNameRange     '2.5.5',
+40 silly addNameRange     '2.5.6',
+40 silly addNameRange     '2.5.7',
+40 silly addNameRange     '2.5.8',
+40 silly addNameRange     '2.5.9',
+40 silly addNameRange     '2.5.10',
+40 silly addNameRange     '2.5.11',
+40 silly addNameRange     '3.0.0',
+40 silly addNameRange     '3.0.1',
+40 silly addNameRange     '3.0.2',
+40 silly addNameRange     '3.0.3',
+40 silly addNameRange     '3.0.4',
+40 silly addNameRange     '3.0.5',
+40 silly addNameRange     '3.0.6',
+40 silly addNameRange     '3.1.0',
+40 silly addNameRange     '3.1.1',
+40 silly addNameRange     '3.1.2',
+40 silly addNameRange     '3.2.0',
+40 silly addNameRange     '3.2.1',
+40 silly addNameRange     '3.2.2',
+40 silly addNameRange     '3.2.3',
+40 silly addNameRange     '3.2.4',
+40 silly addNameRange     '3.2.5',
+40 silly addNameRange     '3.2.6',
+40 silly addNameRange     '3.3.0',
+40 silly addNameRange     '3.3.1',
+40 silly addNameRange     '3.3.2',
+40 silly addNameRange     '3.3.3',
+40 silly addNameRange     '3.3.4',
+40 silly addNameRange     '3.3.5',
+40 silly addNameRange     '3.3.6',
+40 silly addNameRange     '1.0.0-beta',
+40 silly addNameRange     '1.0.0-beta2',
+40 silly addNameRange     '1.0.0-rc',
+40 silly addNameRange     '1.0.0-rc2',
+40 silly addNameRange     '1.0.0-rc3',
+40 silly addNameRange     '1.0.0-rc4',
+40 silly addNameRange     '2.0.0-beta',
+40 silly addNameRange     '2.0.0-beta2',
+40 silly addNameRange     '2.0.0-beta3',
+40 silly addNameRange     '2.0.0-rc',
+40 silly addNameRange     '2.0.0-rc2',
+40 silly addNameRange     '2.0.0-rc3',
+40 silly addNameRange     '3.0.0-alpha1',
+40 silly addNameRange     '3.0.0-alpha2',
+40 silly addNameRange     '3.0.0-alpha3',
+40 silly addNameRange     '3.0.0-alpha4',
+40 silly addNameRange     '3.0.0-alpha5',
+40 silly addNameRange     '3.0.0-beta1',
+40 silly addNameRange     '3.0.0-beta2',
+40 silly addNameRange     '3.0.0-beta3',
+40 silly addNameRange     '3.0.0-beta4',
+40 silly addNameRange     '3.0.0-beta6',
+40 silly addNameRange     '3.0.0-beta7',
+40 silly addNameRange     '3.0.0-rc1',
+40 silly addNameRange     '3.0.0-rc2',
+40 silly addNameRange     '3.0.0-rc3',
+40 silly addNameRange     '3.0.0-rc4',
+40 silly addNameRange     '3.0.0-rc5',
+40 silly addNameRange     '3.3.7',
+40 silly addNameRange     '3.3.8',
+40 silly addNameRange     '3.4.0',
+40 silly addNameRange     '3.4.1',
+40 silly addNameRange     '3.4.2',
+40 silly addNameRange     '3.4.3',
+40 silly addNameRange     '3.4.4',
+40 silly addNameRange     '3.4.5',
+40 silly addNameRange     '3.4.6',
+40 silly addNameRange     '3.4.7',
+40 silly addNameRange     '3.4.8',
+40 silly addNameRange     '4.0.0-rc1',
+40 silly addNameRange     '4.0.0-rc2',
+40 silly addNameRange     '3.5.0',
+40 silly addNameRange     '4.0.0-rc3',
+40 silly addNameRange     '4.0.0-rc4',
+40 silly addNameRange     '3.5.1',
+40 silly addNameRange     '4.0.0',
+40 silly addNameRange     '3.5.2',
+40 silly addNameRange     '4.1.0',
+40 silly addNameRange     '4.1.1',
+40 silly addNameRange     '3.5.3',
+40 silly addNameRange     '4.1.2',
+40 silly addNameRange     '3.6.0',
+40 silly addNameRange     '4.2.0',
+40 silly addNameRange     '3.7.0',
+40 silly addNameRange     '3.8.0',
+40 silly addNameRange     '4.3.0',
+40 silly addNameRange     '4.3.1',
+40 silly addNameRange     '3.8.1',
+40 silly addNameRange     '4.3.2',
+40 silly addNameRange     '3.9.0',
+40 silly addNameRange     '4.4.0',
+40 silly addNameRange     '4.4.1',
+40 silly addNameRange     '3.10.0',
+40 silly addNameRange     '3.10.1',
+40 silly addNameRange     '3.10.2',
+40 silly addNameRange     '3.10.3',
+40 silly addNameRange     '3.10.4',
+40 silly addNameRange     '4.4.2',
+40 silly addNameRange     '3.10.5',
+40 silly addNameRange     '4.4.3',
+40 silly addNameRange     '3.11.0',
+40 silly addNameRange     '4.4.4',
+40 silly addNameRange     '3.12.0',
+40 silly addNameRange     '3.12.1',
+40 silly addNameRange     '4.4.5',
+40 silly addNameRange     '3.13.0',
+40 silly addNameRange     '4.5.0',
+40 silly addNameRange     '4.5.1',
+40 silly addNameRange     '3.14.0',
+40 silly addNameRange     '4.6.0',
+40 silly addNameRange     '4.6.1',
+40 silly addNameRange     '3.15.0',
+40 silly addNameRange     '4.7.0',
+40 silly addNameRange     '3.15.1',
+40 silly addNameRange     '4.7.1',
+40 silly addNameRange     '3.15.2',
+40 silly addNameRange     '4.7.2',
+40 silly addNameRange     '4.7.3',
+40 silly addNameRange     '3.15.3',
+40 silly addNameRange     '4.7.4',
+40 silly addNameRange     '3.16.0',
+40 silly addNameRange     '4.8.0',
+40 silly addNameRange     '3.16.1',
+40 silly addNameRange     '4.8.1',
+40 silly addNameRange     '3.16.2',
+40 silly addNameRange     '4.8.2',
+40 silly addNameRange     '3.16.3',
+40 silly addNameRange     '3.16.4',
+40 silly addNameRange     '4.8.3',
+40 silly addNameRange     '3.16.5',
+40 silly addNameRange     '3.16.6',
+40 silly addNameRange     '4.8.4',
+40 silly addNameRange     '3.16.7',
+40 silly addNameRange     '4.8.5',
+40 silly addNameRange     '3.16.8',
+40 silly addNameRange     '4.8.6',
+40 silly addNameRange     '3.16.9',
+40 silly addNameRange     '4.8.7',
+40 silly addNameRange     '3.16.10',
+40 silly addNameRange     '4.8.8',
+40 silly addNameRange     '3.17.0',
+40 silly addNameRange     '3.17.1',
+40 silly addNameRange     '4.9.0',
+40 silly addNameRange     '3.17.2',
+40 silly addNameRange     '4.9.1',
+40 silly addNameRange     '4.9.2',
+40 silly addNameRange     '3.17.3',
+40 silly addNameRange     '4.9.3',
+40 silly addNameRange     '3.17.4',
+40 silly addNameRange     '4.9.4',
+40 silly addNameRange     '3.17.5',
+40 silly addNameRange     '4.9.5',
+40 silly addNameRange     '3.17.6',
+40 silly addNameRange     '3.17.7',
+40 silly addNameRange     '4.9.6',
+40 silly addNameRange     '4.9.7',
+40 silly addNameRange     '3.17.8',
+40 silly addNameRange     '4.9.8',
+40 silly addNameRange     '3.18.0',
+40 silly addNameRange     '3.18.1',
+40 silly addNameRange     '4.10.0',
+40 silly addNameRange     '3.18.2',
+40 silly addNameRange     '4.10.1',
+40 silly addNameRange     '5.0.0-alpha.1',
+40 silly addNameRange     '3.18.3',
+40 silly addNameRange     '4.10.2',
+40 silly addNameRange     '3.18.4',
+40 silly addNameRange     '4.10.3',
+40 silly addNameRange     '4.10.4',
+40 silly addNameRange     '4.10.5',
+40 silly addNameRange     '3.18.5',
+40 silly addNameRange     '3.18.6',
+40 silly addNameRange     '4.10.6',
+40 silly addNameRange     '4.10.7',
+40 silly addNameRange     '3.19.0',
+40 silly addNameRange     '4.10.8',
+40 silly addNameRange     '4.11.0',
+40 silly addNameRange     '3.19.1',
+40 silly addNameRange     '4.11.1',
+40 silly addNameRange     '3.19.2',
+40 silly addNameRange     '4.11.2',
+40 silly addNameRange     '3.20.0',
+40 silly addNameRange     '4.12.0',
+40 silly addNameRange     '3.20.1',
+40 silly addNameRange     '4.12.1',
+40 silly addNameRange     '4.12.2',
+40 silly addNameRange     '3.20.2',
+40 silly addNameRange     '4.12.3',
+40 silly addNameRange     '3.20.3',
+40 silly addNameRange     '4.12.4',
+40 silly addNameRange     '3.21.0',
+40 silly addNameRange     '4.13.0',
+40 silly addNameRange     '3.21.1',
+40 silly addNameRange     '4.13.1',
+40 silly addNameRange     '5.0.0-alpha.2',
+40 silly addNameRange     '3.21.2',
+40 silly addNameRange     '4.13.2',
+40 silly addNameRange     '4.13.3' ] ]
+41 verbose addNamed [ 'express', '4.13.3' ]
+42 verbose addNamed [ '4.13.3', '4.13.3' ]
+43 silly lockFile 51f1744e-express-4-13-3 express@4.13.3
+44 verbose lock express@4.13.3 /Users/danbreczinski/.npm/51f1744e-express-4-13-3.lock
+45 silly lockFile 0cf3ba70-s-org-express-express-4-13-3-tgz https://registry.npmjs.org/express/-/express-4.13.3.tgz
+46 verbose lock https://registry.npmjs.org/express/-/express-4.13.3.tgz /Users/danbreczinski/.npm/0cf3ba70-s-org-express-express-4-13-3-tgz.lock
+47 verbose addRemoteTarball [ 'https://registry.npmjs.org/express/-/express-4.13.3.tgz',
+47 verbose addRemoteTarball   'ddb2f1fb4502bf33598d2b032b037960ca6c80a3' ]
+48 info retry fetch attempt 1 at 14:58:17
+49 verbose fetch to= /var/folders/bm/xtj28h5s1nn9ptkh_z5r55y40000gp/T/npm-44343-enJHzldQ/registry.npmjs.org/express/-/express-4.13.3.tgz
+50 http GET https://registry.npmjs.org/express/-/express-4.13.3.tgz
+51 verbose git fetch -a origin (git://github.com/danpaul/sql_comments)
+52 verbose git rev-list -n1 master ccd330eabb0bd38641942722748d1840ac2a816e
+53 verbose resolved git url git://github.com/danpaul/sql_comments#ccd330eabb0bd38641942722748d1840ac2a816e
+54 verbose tar unpack /var/folders/bm/xtj28h5s1nn9ptkh_z5r55y40000gp/T/npm-44343-enJHzldQ/1448395097967-0.4786619630176574/tmp.tgz
+55 silly lockFile 5b6f17d9--4786619630176574-tmp-tgz-unpack tar:///var/folders/bm/xtj28h5s1nn9ptkh_z5r55y40000gp/T/npm-44343-enJHzldQ/1448395097967-0.4786619630176574/tmp.tgz-unpack
+56 verbose lock tar:///var/folders/bm/xtj28h5s1nn9ptkh_z5r55y40000gp/T/npm-44343-enJHzldQ/1448395097967-0.4786619630176574/tmp.tgz-unpack /Users/danbreczinski/.npm/5b6f17d9--4786619630176574-tmp-tgz-unpack.lock
+57 silly lockFile 9c60c6dc-97967-0-4786619630176574-tmp-tgz tar:///var/folders/bm/xtj28h5s1nn9ptkh_z5r55y40000gp/T/npm-44343-enJHzldQ/1448395097967-0.4786619630176574/tmp.tgz
+58 verbose lock tar:///var/folders/bm/xtj28h5s1nn9ptkh_z5r55y40000gp/T/npm-44343-enJHzldQ/1448395097967-0.4786619630176574/tmp.tgz /Users/danbreczinski/.npm/9c60c6dc-97967-0-4786619630176574-tmp-tgz.lock
+59 silly gunzTarPerm modes [ '755', '644' ]
+60 silly gunzTarPerm extractEntry
+61 silly gunzTarPerm modified mode [ '', 509, 493 ]
+62 silly gunzTarPerm extractEntry .gitignore
+63 silly gunzTarPerm modified mode [ '.gitignore', 436, 420 ]
+64 silly gunzTarPerm extractEntry .npmignore
+65 silly gunzTarPerm modified mode [ '.npmignore', 436, 420 ]
+66 silly gunzTarPerm extractEntry README.md
+67 silly gunzTarPerm modified mode [ 'README.md', 436, 420 ]
+68 silly gunzTarPerm extractEntry dev/
+69 silly gunzTarPerm modified mode [ 'dev/', 509, 493 ]
+70 silly gunzTarPerm extractEntry dev/todo.txt
+71 silly gunzTarPerm modified mode [ 'dev/todo.txt', 436, 420 ]
+72 silly gunzTarPerm extractEntry index.js
+73 silly gunzTarPerm modified mode [ 'index.js', 436, 420 ]
+74 silly gunzTarPerm extractEntry models/
+75 silly gunzTarPerm modified mode [ 'models/', 509, 493 ]
+76 silly gunzTarPerm extractEntry models/_comment.js
+77 silly gunzTarPerm modified mode [ 'models/_comment.js', 436, 420 ]
+78 silly gunzTarPerm extractEntry models/base.js
+79 silly gunzTarPerm modified mode [ 'models/base.js', 436, 420 ]
+80 silly gunzTarPerm extractEntry models/comment.js
+81 silly gunzTarPerm modified mode [ 'models/comment.js', 436, 420 ]
+82 silly gunzTarPerm extractEntry models/flag.js
+83 silly gunzTarPerm modified mode [ 'models/flag.js', 436, 420 ]
+84 silly gunzTarPerm extractEntry models/flagged_user_log.js
+85 silly gunzTarPerm modified mode [ 'models/flagged_user_log.js', 436, 420 ]
+86 silly gunzTarPerm extractEntry models/index.js
+87 silly gunzTarPerm modified mode [ 'models/index.js', 436, 420 ]
+88 silly gunzTarPerm extractEntry models/user_flag_ban.js
+89 silly gunzTarPerm modified mode [ 'models/user_flag_ban.js', 436, 420 ]
+90 silly gunzTarPerm extractEntry models/vote.js
+91 silly gunzTarPerm modified mode [ 'models/vote.js', 436, 420 ]
+92 silly gunzTarPerm extractEntry package.json
+93 silly gunzTarPerm modified mode [ 'package.json', 436, 420 ]
+94 silly gunzTarPerm extractEntry schema.js
+95 silly gunzTarPerm modified mode [ 'schema.js', 436, 420 ]
+96 silly gunzTarPerm extractEntry settings.js
+97 silly gunzTarPerm modified mode [ 'settings.js', 436, 420 ]
+98 silly gunzTarPerm extractEntry test/
+99 silly gunzTarPerm modified mode [ 'test/', 509, 493 ]
+100 silly gunzTarPerm extractEntry test/index.js
+101 silly gunzTarPerm modified mode [ 'test/index.js', 436, 420 ]
+102 silly lockFile 5b6f17d9--4786619630176574-tmp-tgz-unpack tar:///var/folders/bm/xtj28h5s1nn9ptkh_z5r55y40000gp/T/npm-44343-enJHzldQ/1448395097967-0.4786619630176574/tmp.tgz-unpack
+103 silly lockFile 5b6f17d9--4786619630176574-tmp-tgz-unpack tar:///var/folders/bm/xtj28h5s1nn9ptkh_z5r55y40000gp/T/npm-44343-enJHzldQ/1448395097967-0.4786619630176574/tmp.tgz-unpack
+104 silly lockFile 9c60c6dc-97967-0-4786619630176574-tmp-tgz tar:///var/folders/bm/xtj28h5s1nn9ptkh_z5r55y40000gp/T/npm-44343-enJHzldQ/1448395097967-0.4786619630176574/tmp.tgz
+105 silly lockFile 9c60c6dc-97967-0-4786619630176574-tmp-tgz tar:///var/folders/bm/xtj28h5s1nn9ptkh_z5r55y40000gp/T/npm-44343-enJHzldQ/1448395097967-0.4786619630176574/tmp.tgz
+106 silly lockFile 431f3030--github-com-danpaul-sql-comments git://github.com/danpaul/sql_comments
+107 silly lockFile 431f3030--github-com-danpaul-sql-comments git://github.com/danpaul/sql_comments
+108 http 200 https://registry.npmjs.org/express/-/express-4.13.3.tgz
+109 silly lockFile 0cf3ba70-s-org-express-express-4-13-3-tgz https://registry.npmjs.org/express/-/express-4.13.3.tgz
+110 silly lockFile 0cf3ba70-s-org-express-express-4-13-3-tgz https://registry.npmjs.org/express/-/express-4.13.3.tgz
+111 silly lockFile 51f1744e-express-4-13-3 express@4.13.3
+112 silly lockFile 51f1744e-express-4-13-3 express@4.13.3
+113 silly lockFile dbce67be-express-4-12-3 express@^4.12.3
+114 silly lockFile dbce67be-express-4-12-3 express@^4.12.3
+115 error Error: EACCES, mkdir '/Users/danbreczinski/.npm/express/4.13.3'
+115 error  { [Error: EACCES, mkdir '/Users/danbreczinski/.npm/express/4.13.3']
+115 error   errno: 3,
+115 error   code: 'EACCES',
+115 error   path: '/Users/danbreczinski/.npm/express/4.13.3',
+115 error   parent: 'sql_comments_middleware' }
+116 error Please try running this command again as root/Administrator.
+117 error System Darwin 14.5.0
+118 error command "node" "/usr/local/bin/npm" "install"
+119 error cwd /Applications/MAMP/htdocs/dan/geo_lit/node_modules/sql_comments_middleware
+120 error node -v v0.10.40
+121 error npm -v 1.4.28
+122 error path /Users/danbreczinski/.npm/express/4.13.3
+123 error code EACCES
+124 error errno 3
+125 error stack Error: EACCES, mkdir '/Users/danbreczinski/.npm/express/4.13.3'
+126 verbose exit [ 3, true ]
