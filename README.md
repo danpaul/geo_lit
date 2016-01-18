@@ -70,3 +70,5 @@ address already in use: pkill node
 custom style map marker
 
 https://developers.google.com/maps/documentation/javascript/symbols
+
+adjust zoom: http://stackoverflow.com/questions/5701055/google-maps-v3-adjust-zoom-level-after-map-has-been-initialised

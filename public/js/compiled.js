@@ -440,23 +440,25 @@ var Comment = React.createClass({displayName: "Comment",
                                 {display: 'block'} : {display: 'none'}}, 
 
                     React.createElement("a", {onClick: this.handleUpvote}, 
-                        "upvote"
-                    ), " - ", 
+                        React.createElement("i", {className: "fi-arrow-up"})
+                    ), "  ", 
                     React.createElement("a", {onClick: this.handleDownvote}, 
-                        "downvote"
-                    ), " - ", 
+                        React.createElement("i", {className: "fi-arrow-down"})
+                    ), "  ", 
                     React.createElement("a", {onClick: this.handleFlag}, 
-                        "flag"
-                    ), " - ", 
+                        React.createElement("i", {className: "fi-flag"})
+                    ), "  ", 
                     React.createElement("a", {onClick: this.handleToggleCommentForm}, 
-                        "comment"
+                        React.createElement("i", {className: "fi-comment"})
                     ), 
                     React.createElement("span", {style:  hasChildren ?
                         {display: 'inline'} : {display: 'none'}}, 
 
-                        " - ", 
+                        "  ", 
                         React.createElement("a", {onClick: this.handleToggleChilren}, 
-                             this.state.showChildren ? 'collapse' : 'reveal'
+                             this.state.showChildren ?
+                                React.createElement("i", {className: "fi-arrows-compress"}) :
+                                React.createElement("i", {className: "fi-arrows-expand"})
                         )
                     )
                 ), 
@@ -612,10 +614,10 @@ geoLit.addPlacesToMap = function(places){
 
 geoLit.updatePlaces = function(callbackIn){
 
-    services.findNear({latitude: geoLit.currentLatitude,
-                    longitude: geoLit.currentLongitude,
-                    range: DEFAULT_RANGE},
-                   function(err, places){
+    services.findNear({ latitude: geoLit.currentLatitude,
+                        longitude: geoLit.currentLongitude,
+                        range: DEFAULT_RANGE    },
+                      function(err, places){
 
         // find any markers not currently on the map
         var newPlaces = _.filter(places, function(place){

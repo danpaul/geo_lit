@@ -120,10 +120,10 @@ geoLit.addPlacesToMap = function(places){
 
 geoLit.updatePlaces = function(callbackIn){
 
-    services.findNear({latitude: geoLit.currentLatitude,
-                    longitude: geoLit.currentLongitude,
-                    range: DEFAULT_RANGE},
-                   function(err, places){
+    services.findNear({ latitude: geoLit.currentLatitude,
+                        longitude: geoLit.currentLongitude,
+                        range: DEFAULT_RANGE    },
+                      function(err, places){
 
         // find any markers not currently on the map
         var newPlaces = _.filter(places, function(place){

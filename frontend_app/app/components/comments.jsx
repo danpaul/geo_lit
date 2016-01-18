@@ -318,23 +318,25 @@ var Comment = React.createClass({
                                 {display: 'block'} : {display: 'none'}}>
 
                     <a onClick={this.handleUpvote}>
-                        upvote
-                    </a>&nbsp;-&nbsp;
+                        <i className="fi-arrow-up"></i>
+                    </a>&nbsp;&nbsp;
                     <a onClick={this.handleDownvote}>
-                        downvote
-                    </a>&nbsp;-&nbsp;
+                        <i className="fi-arrow-down"></i>
+                    </a>&nbsp;&nbsp;
                     <a onClick={this.handleFlag}>
-                        flag
-                    </a>&nbsp;-&nbsp;
+                        <i className="fi-flag"></i>
+                    </a>&nbsp;&nbsp;
                     <a onClick={this.handleToggleCommentForm}>
-                        comment
+                        <i className="fi-comment"></i>
                     </a>
                     <span style={ hasChildren ?
                         {display: 'inline'} : {display: 'none'}}>
 
-                        &nbsp;-&nbsp;
+                        &nbsp;&nbsp;
                         <a onClick={this.handleToggleChilren}>
-                            { this.state.showChildren ? 'collapse' : 'reveal' }
+                            { this.state.showChildren ?
+                                <i className="fi-arrows-compress"></i> :
+                                <i className="fi-arrows-expand"></i> }
                         </a>
                     </span>
                 </div>
