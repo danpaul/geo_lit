@@ -9,10 +9,12 @@ if( window.location.href.toLowerCase().indexOf('localhost') !==  -1 ||
 
 if( config.environment === 'development' ){
 
-    config.geoLitEndpoint = 'http://localhost:3000';    
+    config.geoLitEndpoint = 'http://localhost:3000';
+    config.testing = true;
 
 } else {
 
+    config.testing = false;
 }
 
 config.commentEndpoint = config.geoLitEndpoint + '/discussion';

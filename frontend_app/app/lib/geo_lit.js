@@ -1,7 +1,13 @@
+var mapStyles = require('./map_styles');
+var config = require('../../config');
+
 var geoLit = {};
 
 var _ = require('underscore');
-var services = require('./services')
+var services = require('./services');
+
+var MARKER_SCALE = 6.0;
+var MARKER_OPACITY = 0.5;
 
 /*******************************************************************************
 
@@ -38,12 +44,13 @@ geoLit.user = null;
 geoLit.createMap = function(){
     var mapOptions = {
         zoom: geoLit.zoomLevel,
-        disableDefaultUI: true,
+        // disableDefaultUI: true,
         center: new google.maps.LatLng(geoLit.currentLatitude,
                                        geoLit.currentLongitude)
     };
     geoLit.map = new google.maps.Map(document.getElementById(geoLit.mapId),
                                      mapOptions);
+    geoLit.map.set('styles', mapStyles);
 }
 
 // gets user's current position
@@ -81,6 +88,13 @@ geoLit.updatePosition = function(callbackIn){
 geoLit.addPlacesToMap = function(places){
 
     _.each(places, function(place){
+        var image = {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#A22C29',
+            strokeColor: '#902923',
+            fillOpacity: MARKER_OPACITY,
+            scale: MARKER_SCALE
+        }
 
         // set new marker
         var latLang = new google.maps.LatLng(place.location[1],
@@ -88,9 +102,10 @@ geoLit.addPlacesToMap = function(places){
 
         // add marker to map        
         geoLit.placeMarkers[place._id] =  new google.maps.Marker({
+            icon: image,
             position: latLang,
             map: geoLit.map,
-            title: 'TEST TITLE',
+            title: place.title,
             geoLit: {_id: place._id, title: 'TEST TITLE'}
         });
 
@@ -112,33 +127,41 @@ geoLit.updatePlaces = function(callbackIn){
 
         // find any markers not currently on the map
         var newPlaces = _.filter(places, function(place){
-            return(typeof(geoLit.placeMarkers[place._id]) === 'undefined')
+            return(typeof(geoLit.placeMarkers[place._id]) === 'undefined');
         })
 
-        geoLit.addPlacesToMap(newPlaces)
+        geoLit.addPlacesToMap(newPlaces);
 
     })
 }
 
 geoLit.updateUserMarker = function(){
-    // delete existing marker
-    if( geoLit.userMarker !== null ){ geoLit.userMarker.setMap(null) }
 
+    var latLang = new google.maps.LatLng(geoLit.currentLatitude,
+                                         geoLit.currentLongitude);
 
-// asdf asdf asdf
-    // set new marker
-    var latLang = new google.maps.LatLng(geoLit.currentLatitude + .002,
-                                         geoLit.currentLongitude + .002);
+    if( geoLit.userMarker === null ){
 
-    geoLit.userMarker = new google.maps.Marker({
-      position: latLang,
-      map: geoLit.map,
-      title: 'Current Position'
-    });
+        var image = {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#6369D1',
+            strokeColor: '#62bfd1',
+            fillOpacity: MARKER_OPACITY,
+            scale: MARKER_SCALE
+        }
 
-    if( geoLit.mapFollow ){
-        geoLit.recenterMap()
+        geoLit.userMarker = new google.maps.Marker({
+            position: latLang,
+            map: geoLit.map,
+            title: 'Current Position',
+            icon: image
+        });
+
+    } else {
+        geoLit.userMarker.setPosition(latLang);
     }
+
+    if( geoLit.mapFollow ){ geoLit.recenterMap(); }
 }
 
 // recenters map on users current position

@@ -32,7 +32,18 @@ geo-lit-place-click [_id: place id]
 
 ## Todo
 
-+ you should be logged in after registering
+* Update map:
+  * add marker for self
+  * use round markers with green for viewable red for non-viewable
+  * add zoom functionality
+  * add radius for viewable area
+  * remove default UI and add zoom
+* Update comments
+  * date formatting
+  * comment ranking?
+* User management
+  * confirm user is logged in after registering
+  * add password resets
 
 update:
     /node_modules/sql_login_middleware/index.js
@@ -49,3 +60,13 @@ user auth:
 ???
 sync /node_modules/sql_login_middleware/index.js with repo
 sync /node_modules/sql_comments_middleware with repo
+
+## Notes
+
+resize map marker: http://stackoverflow.com/questions/3942573/use-an-svg-for-a-marker-in-google-maps
+
+address already in use: pkill node
+
+custom style map marker
+
+https://developers.google.com/maps/documentation/javascript/symbols

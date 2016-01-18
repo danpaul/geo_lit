@@ -119,7 +119,7 @@ module.exports = React.createClass({displayName: "exports",
 
 });
 
-},{"../lib/geo_lit.js":3,"../lib/services.js":4,"../lib/user/lib/alert.jsx":6,"../lib/user/lib/modal.jsx":9}],2:[function(require,module,exports){
+},{"../lib/geo_lit.js":3,"../lib/services.js":5,"../lib/user/lib/alert.jsx":7,"../lib/user/lib/modal.jsx":10}],2:[function(require,module,exports){
 var _ = require('underscore');
 
 var SERVER_ERROR_MESSAGE = 'A server error occurred.';
@@ -489,11 +489,17 @@ var Comment = React.createClass({displayName: "Comment",
     }
 });
 
-},{"underscore":14}],3:[function(require,module,exports){
+},{"underscore":15}],3:[function(require,module,exports){
+var mapStyles = require('./map_styles');
+var config = require('../../config');
+
 var geoLit = {};
 
 var _ = require('underscore');
-var services = require('./services')
+var services = require('./services');
+
+var MARKER_SCALE = 6.0;
+var MARKER_OPACITY = 0.5;
 
 /*******************************************************************************
 
@@ -530,12 +536,13 @@ geoLit.user = null;
 geoLit.createMap = function(){
     var mapOptions = {
         zoom: geoLit.zoomLevel,
-        disableDefaultUI: true,
+        // disableDefaultUI: true,
         center: new google.maps.LatLng(geoLit.currentLatitude,
                                        geoLit.currentLongitude)
     };
     geoLit.map = new google.maps.Map(document.getElementById(geoLit.mapId),
                                      mapOptions);
+    geoLit.map.set('styles', mapStyles);
 }
 
 // gets user's current position
@@ -573,6 +580,13 @@ geoLit.updatePosition = function(callbackIn){
 geoLit.addPlacesToMap = function(places){
 
     _.each(places, function(place){
+        var image = {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#A22C29',
+            strokeColor: '#902923',
+            fillOpacity: MARKER_OPACITY,
+            scale: MARKER_SCALE
+        }
 
         // set new marker
         var latLang = new google.maps.LatLng(place.location[1],
@@ -580,9 +594,10 @@ geoLit.addPlacesToMap = function(places){
 
         // add marker to map        
         geoLit.placeMarkers[place._id] =  new google.maps.Marker({
+            icon: image,
             position: latLang,
             map: geoLit.map,
-            title: 'TEST TITLE',
+            title: place.title,
             geoLit: {_id: place._id, title: 'TEST TITLE'}
         });
 
@@ -604,33 +619,41 @@ geoLit.updatePlaces = function(callbackIn){
 
         // find any markers not currently on the map
         var newPlaces = _.filter(places, function(place){
-            return(typeof(geoLit.placeMarkers[place._id]) === 'undefined')
+            return(typeof(geoLit.placeMarkers[place._id]) === 'undefined');
         })
 
-        geoLit.addPlacesToMap(newPlaces)
+        geoLit.addPlacesToMap(newPlaces);
 
     })
 }
 
 geoLit.updateUserMarker = function(){
-    // delete existing marker
-    if( geoLit.userMarker !== null ){ geoLit.userMarker.setMap(null) }
 
+    var latLang = new google.maps.LatLng(geoLit.currentLatitude,
+                                         geoLit.currentLongitude);
 
-// asdf asdf asdf
-    // set new marker
-    var latLang = new google.maps.LatLng(geoLit.currentLatitude + .002,
-                                         geoLit.currentLongitude + .002);
+    if( geoLit.userMarker === null ){
 
-    geoLit.userMarker = new google.maps.Marker({
-      position: latLang,
-      map: geoLit.map,
-      title: 'Current Position'
-    });
+        var image = {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#6369D1',
+            strokeColor: '#62bfd1',
+            fillOpacity: MARKER_OPACITY,
+            scale: MARKER_SCALE
+        }
 
-    if( geoLit.mapFollow ){
-        geoLit.recenterMap()
+        geoLit.userMarker = new google.maps.Marker({
+            position: latLang,
+            map: geoLit.map,
+            title: 'Current Position',
+            icon: image
+        });
+
+    } else {
+        geoLit.userMarker.setPosition(latLang);
     }
+
+    if( geoLit.mapFollow ){ geoLit.recenterMap(); }
 }
 
 // recenters map on users current position
@@ -695,7 +718,11 @@ geoLit.setUser = function(user){
 
 module.exports = geoLit
 
-},{"./services":4,"underscore":14}],4:[function(require,module,exports){
+},{"../../config":14,"./map_styles":4,"./services":5,"underscore":15}],4:[function(require,module,exports){
+// https://snazzymaps.com/style/49532/town-and-country
+module.exports = [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#444444"}]},{"featureType":"landscape","elementType":"all","stylers":[{"color":"#f2f2f2"}]},{"featureType":"landscape.natural","elementType":"all","stylers":[{"visibility":"on"}]},{"featureType":"landscape.natural","elementType":"geometry","stylers":[{"visibility":"on"}]},{"featureType":"landscape.natural.landcover","elementType":"geometry.fill","stylers":[{"visibility":"on"}]},{"featureType":"poi","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"poi","elementType":"labels.text","stylers":[{"color":"#101010"}]},{"featureType":"poi.attraction","elementType":"labels","stylers":[{"visibility":"on"},{"hue":"#ff0000"}]},{"featureType":"poi.attraction","elementType":"labels.text.fill","stylers":[{"visibility":"off"}]},{"featureType":"poi.attraction","elementType":"labels.text.stroke","stylers":[{"visibility":"on"}]},{"featureType":"poi.business","elementType":"geometry.fill","stylers":[{"visibility":"on"}]},{"featureType":"poi.business","elementType":"labels","stylers":[{"visibility":"on"}]},{"featureType":"poi.business","elementType":"labels.text.fill","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","elementType":"labels.text.stroke","stylers":[{"color":"#656565"}]},{"featureType":"poi.park","elementType":"geometry","stylers":[{"visibility":"off"}]},{"featureType":"poi.place_of_worship","elementType":"geometry.fill","stylers":[{"visibility":"off"}]},{"featureType":"poi.place_of_worship","elementType":"labels","stylers":[{"visibility":"on"}]},{"featureType":"poi.place_of_worship","elementType":"labels.text.fill","stylers":[{"visibility":"off"}]},{"featureType":"poi.school","elementType":"geometry.fill","stylers":[{"color":"#ff0000"},{"visibility":"off"}]},{"featureType":"poi.school","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"poi.school","elementType":"labels.text.fill","stylers":[{"visibility":"off"},{"color":"#ff0000"}]},{"featureType":"poi.school","elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#363636"}]},{"featureType":"poi.school","elementType":"labels.icon","stylers":[{"visibility":"on"},{"hue":"#ff0000"}]},{"featureType":"road","elementType":"all","stylers":[{"saturation":-100},{"lightness":45}]},{"featureType":"road.highway","elementType":"all","stylers":[{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"visibility":"on"},{"color":"#ababab"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"visibility":"off"}]},{"featureType":"road.highway","elementType":"labels.text.fill","stylers":[{"visibility":"on"},{"color":"#3f3f3f"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"visibility":"off"},{"color":"#646464"}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"visibility":"off"}]},{"featureType":"road.local","elementType":"geometry.stroke","stylers":[{"visibility":"on"},{"weight":"0.76"},{"color":"#ffffff"}]},{"featureType":"road.local","elementType":"labels.text","stylers":[{"color":"#ff0000"}]},{"featureType":"road.local","elementType":"labels.text.fill","stylers":[{"color":"#9a9a9a"}]},{"featureType":"road.local","elementType":"labels.text.stroke","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"transit.station","elementType":"all","stylers":[{"visibility":"on"}]},{"featureType":"water","elementType":"all","stylers":[{"color":"#ffffff"},{"visibility":"on"}]}];
+
+},{}],5:[function(require,module,exports){
 var services = {}
 var config = require('../../config.js')
 
@@ -742,7 +769,7 @@ services.findNear = function(positionData, callbackIn){
 
 module.exports = services;
 
-},{"../../config.js":13}],5:[function(require,module,exports){
+},{"../../config.js":14}],6:[function(require,module,exports){
 var FormInput = require('./lib/input.jsx');
 var LoginForm = require('./lib/login_form.jsx');
 var RegisterForm = require('./lib/register_form.jsx');
@@ -879,7 +906,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 });
 
-},{"./lib/input.jsx":7,"./lib/login_form.jsx":8,"./lib/modal.jsx":9,"./lib/register_form.jsx":10,"./lib/services_handler.js":11}],6:[function(require,module,exports){
+},{"./lib/input.jsx":8,"./lib/login_form.jsx":9,"./lib/modal.jsx":10,"./lib/register_form.jsx":11,"./lib/services_handler.js":12}],7:[function(require,module,exports){
 /**
 * Takes property `message`, will display message if not empty
 * Optionally takes styles (object)
@@ -901,7 +928,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 });
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = React.createClass({displayName: "exports",
 
     getInitialState: function(){
@@ -929,7 +956,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 })
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var FormInput = require('./input.jsx');
 var Alert = require('./alert.jsx');
 var servicesHandler = require('./services_handler.js');
@@ -989,7 +1016,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 })
 
-},{"./alert.jsx":6,"./input.jsx":7,"./services_handler.js":11}],9:[function(require,module,exports){
+},{"./alert.jsx":7,"./input.jsx":8,"./services_handler.js":12}],10:[function(require,module,exports){
 /**
 * should pass properites:
 *   visible: true/false
@@ -1068,7 +1095,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 });
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var Alert = require('./alert.jsx');
 var FormInput = require('./input.jsx');
 var servicesHandler = require('./services_handler.js')
@@ -1193,7 +1220,7 @@ function validateEmail(email) {
     return re.test(email);
 }
 
-},{"./alert.jsx":6,"./input.jsx":7,"./services_handler.js":11}],11:[function(require,module,exports){
+},{"./alert.jsx":7,"./input.jsx":8,"./services_handler.js":12}],12:[function(require,module,exports){
 var STATUS_SUCCESS = 'success',
     STATUS_FAILURE = 'failure',
     STATUS_ERROR = 'error';
@@ -1262,7 +1289,7 @@ var makeRequest = function(requestData, callback){
     $.ajax(requestData);
 }
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /*******************************************************************************
 
                     SETUP
@@ -1392,7 +1419,7 @@ var Main = React.createClass({displayName: "Main",
 
 React.render(React.createElement(Main, null), document.getElementById('content'));
 
-},{"../config":13,"./components/addPlaceForm.jsx":1,"./components/comments.jsx":2,"./lib/geo_lit":3,"./lib/user/index.jsx":5,"./lib/user/lib/modal.jsx":9}],13:[function(require,module,exports){
+},{"../config":14,"./components/addPlaceForm.jsx":1,"./components/comments.jsx":2,"./lib/geo_lit":3,"./lib/user/index.jsx":6,"./lib/user/lib/modal.jsx":10}],14:[function(require,module,exports){
 var config = {};
 
 if( window.location.href.toLowerCase().indexOf('localhost') !==  -1 ||
@@ -1404,10 +1431,12 @@ if( window.location.href.toLowerCase().indexOf('localhost') !==  -1 ||
 
 if( config.environment === 'development' ){
 
-    config.geoLitEndpoint = 'http://localhost:3000';    
+    config.geoLitEndpoint = 'http://localhost:3000';
+    config.testing = true;
 
 } else {
 
+    config.testing = false;
 }
 
 config.commentEndpoint = config.geoLitEndpoint + '/discussion';
@@ -1415,7 +1444,7 @@ config.userEndpoint = config.geoLitEndpoint + '/user';
 
 module.exports = config;
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -2965,4 +2994,4 @@ module.exports = config;
   }
 }.call(this));
 
-},{}]},{},[12]);
+},{}]},{},[13]);
